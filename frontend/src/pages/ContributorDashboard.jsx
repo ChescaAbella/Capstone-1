@@ -10,7 +10,7 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import './Dashboard.css';
 
-export const StudentDashboard = () => {
+export const ContributorDashboard = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [showAssistant, setShowAssistant] = useState(false);

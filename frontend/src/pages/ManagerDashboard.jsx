@@ -10,7 +10,7 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import './Dashboard.css';
 
-export const TeacherDashboard = () => {
+export const ManagerDashboard = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [showCreateAssignment, setShowCreateAssignment] = useState(false);

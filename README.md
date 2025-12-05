@@ -338,14 +338,14 @@ This project is developed as an educational capstone project.
 
 ---
 
-## 🤝 Contributing
+## 👥 Team Members
 
-Contributions are welcome! Please follow the existing code style and create components following the established patterns.
-
-1. Create a feature branch (`git checkout -b feature/amazing-feature`)
-2. Commit changes (`git commit -m 'Add amazing feature'`)
-3. Push to branch (`git push origin feature/amazing-feature`)
-4. Open a Pull Request
+| Name                             | Role                                  | CIT-U Email                     | GitHub                                           |
+| -------------------------------- | ------------------------------------- | ------------------------------- | ------------------------------------------------ |
+| **Abella, Franchesca Louise R.** | Project Leader & Lead Developer | franchescalouise.abella@cit.edu | [@chescaabella](https://github.com/chescaabella) |
+| **Alcarez, Johannah Rhey S.** | Frontend Developer    | johannahrhey.alcarez@cit.edu | [@lovenahnah](https://github.com/lovenahnah) |
+| **Gilbuena, Chelter Matthew T.** | Backend Developer     | cheltermatthew.gilbuena@cit.edu    | [@cm6322](https://github.com/cm6322)   |
+| **Morre, Lyndon Luke A.** | Backend Developer      | lyndonluke.morre@cit.edu     | [@Mores20](https://github.com/Mores20)         |
 
 ---
 

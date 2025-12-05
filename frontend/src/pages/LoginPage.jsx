@@ -103,7 +103,7 @@ export const LoginPage = () => {
               disabled={loading}
             >
               {loading ? 'Logging in...' : 'Login'}
-            />
+            </Button>
           </form>
 
           <div className="auth-footer">
