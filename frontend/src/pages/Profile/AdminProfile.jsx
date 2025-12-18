@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { Navbar } from '../../components/Navbar';
 import { Button } from '../../components/Button';
 import { Input } from '../../components/Input';
 import { Alert } from '../../components/Alert';
@@ -184,61 +183,57 @@ const AdminProfile = ({ userId }) => {
 
   if (loading) {
     return (
-      <div>
-        <Navbar />
-        <div className="profile-container">
-          <div className="profile-loading">Loading profile...</div>
-        </div>
+      <div className="profile-container">
+        <div className="profile-loading">Loading profile...</div>
       </div>
     );
   }
 
   return (
-    <div>
-      <Navbar />
-      <div className="profile-container">
-        <div className="profile-card">
-          <div className="profile-header">
-            <div className="profile-avatar">
-              {avatarPreview ? (
-                <img src={avatarPreview} alt={formData.name} />
-              ) : (
-                <div className="avatar-placeholder">
-                  {formData.name?.charAt(0)?.toUpperCase() || '?'}
-                </div>
-              )}
+    <div className="profile-container">
+      <div className="profile-header">
+        <div className="profile-avatar">
+          {avatarPreview ? (
+            <img src={avatarPreview} alt={formData.name} />
+          ) : (
+            <div className="avatar-placeholder">
+              {formData.name?.charAt(0)?.toUpperCase() || '?'}
             </div>
+          )}
+        </div>
 
-            <div className="profile-info">
-              <h2>{formData.name || 'Administrator'}</h2>
-              <p className="profile-email">{formData.email}</p>
-              <span className="profile-role-badge admin-badge">Administrator</span>
-            </div>
+        <div className="profile-info">
+          <h2>{formData.name || 'Administrator'}</h2>
+          <p className="profile-email">{formData.email}</p>
+          <span className="profile-role-badge admin-badge">Administrator</span>
+        </div>
 
-            <div className="profile-avatar-actions">
-              <label className="upload-avatar-label">
-                Change photo
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleAvatarChange}
-                  style={{ display: 'none' }}
-                />
-              </label>
+        <div className="profile-avatar-actions">
+          <label className="upload-avatar-label">
+            Change photo
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleAvatarChange}
+              style={{ display: 'none' }}
+            />
+          </label>
 
-              {selectedFile && (
-                <Button
-                  type="button"
-                  variant="secondary"
-                  onClick={handleAvatarUpload}
-                  disabled={uploading}
-                >
-                  {uploading ? 'Uploading...' : 'Save Photo'}
-                </Button>
-              )}
-            </div>
-          </div>
+          {selectedFile && (
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={handleAvatarUpload}
+              disabled={uploading}
+            >
+              {uploading ? 'Uploading...' : 'Save Photo'}
+            </Button>
+          )}
+        </div>
+      </div>
 
+      <div className="profile-content">
+        <div className="profile-form-section">
           {error && (
             <Alert
               type="danger"
@@ -337,23 +332,20 @@ const AdminProfile = ({ userId }) => {
           </form>
         </div>
 
-        <div className="profile-sidebar">
-          <div className="info-card">
-            <h3>Account Status</h3>
-            <div className="status-item">
-              <span className="status-label">Status: </span>
-              <span className="status-badge active">Active</span>
-            </div>
-            <div className="status-item">
-              <span className="status-label">Role: </span>
-              <span>Administrator</span>
-            </div>
-            <div className="status-item">
-              <span className="status-label">Department: </span>
-              <span className="team-code">
-                {formData.team || 'Not set'}
-              </span>
-            </div>
+        <div className="profile-status">
+          <div className="status-item">
+            <span className="status-label">Status:</span>
+            <span className="status-badge active">Active</span>
+          </div>
+          <div className="status-item">
+            <span className="status-label">Role:</span>
+            <span>Administrator</span>
+          </div>
+          <div className="status-item">
+            <span className="status-label">Department:</span>
+            <span className="team-code">
+              {formData.team || 'Not set'}
+            </span>
           </div>
         </div>
       </div>

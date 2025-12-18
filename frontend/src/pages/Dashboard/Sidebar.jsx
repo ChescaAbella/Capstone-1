@@ -20,10 +20,8 @@ const Sidebar = ({ role }) => {
   const navItems = {
     MEMBER: [
       { icon: '📊', label: 'Dashboard', path: '/dashboard', action: () => navigate('/dashboard') },
-      { icon: '📤', label: 'Submissions', path: '/submissions', action: () => navigate('/submissions') },
-      { icon: '📋', label: 'Deliverables', path: '/deliverables', action: () => navigate('/deliverables') },
-      { icon: '⏰', label: 'Deadlines', path: '/deadlines', action: () => navigate('/deadlines') },
-      { icon: '📈', label: 'Progress', path: '/progress', action: () => navigate('/progress') },
+      { icon: '�', label: 'Deliverables', path: '/member/deliverables', action: () => navigate('/member/deliverables') },
+      { icon: '📜', label: 'History', path: '/member/history', action: () => navigate('/member/history') },
     ],
     MANAGER: [
       { icon: '📊', label: 'Dashboard', path: '/dashboard', action: () => navigate('/dashboard') },

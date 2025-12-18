@@ -1,4 +1,5 @@
 import { useAuth } from '../../context/AuthContext';
+import DashboardLayout from '../Dashboard/DashboardLayout';
 import MemberProfile from './MemberProfile';
 import ManagerProfile from './ManagerProfile';
 import AdminProfile from './AdminProfile';
@@ -10,15 +11,19 @@ export const ProfilePage = () => {
     return <div>Loading...</div>;
   }
 
-  switch (user.role) {
-    case 'MEMBER':
-      return <MemberProfile userId={user.id} />;
-    case 'MANAGER':
-      return <ManagerProfile userId={user.id} />;
-    case 'ADMIN':
-      return <AdminProfile userId={user.id} />;
-    default:
-      return <MemberProfile userId={user.id} />;
-  }
+  const renderProfile = () => {
+    switch (user.role) {
+      case 'MEMBER':
+        return <MemberProfile userId={user.id} />;
+      case 'MANAGER':
+        return <ManagerProfile userId={user.id} />;
+      case 'ADMIN':
+        return <AdminProfile userId={user.id} />;
+      default:
+        return <MemberProfile userId={user.id} />;
+    }
+  };
+
+  return <DashboardLayout>{renderProfile()}</DashboardLayout>;
 };
 

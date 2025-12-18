@@ -9,6 +9,9 @@ import { AdminPanel } from './pages/AdminPanel';
 import MemberDashboard from './pages/Dashboard/MemberDashboard';
 import ManagerDashboard from './pages/Dashboard/ManagerDashboard';
 import AdminDashboard from './pages/Dashboard/AdminDashboard';
+import MemberDeliverablesPage from './pages/Member/Deliverables';
+import DeliverableSubmitPage from './pages/Member/DeliverableSubmit';
+import HistoryPage from './pages/Member/History';
 import MockUserPanel from './components/MockUserPanel';
 import './styles/global.css';
 
@@ -58,6 +61,34 @@ function AppContent() {
         element={
           <ProtectedRoute>
             <DashboardRouter />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Member Routes */}
+      <Route
+        path="/member/deliverables"
+        element={
+          <ProtectedRoute requiredRole="MEMBER">
+            <MemberDeliverablesPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/member/deliverables/:id"
+        element={
+          <ProtectedRoute requiredRole="MEMBER">
+            <DeliverableSubmitPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/member/history"
+        element={
+          <ProtectedRoute requiredRole="MEMBER">
+            <HistoryPage />
           </ProtectedRoute>
         }
       />
