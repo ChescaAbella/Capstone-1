@@ -178,10 +178,10 @@ const AllUsersPage = () => {
       ).length,
     },
     {
-      label: "Teachers",
-      value: "TEACHER",
+      label: "Managers",
+      value: "MANAGER",
       count: (filterRole === "ARCHIVED" ? allUsers : users).filter(
-        (u) => u.role === "TEACHER"
+        (u) => u.role === "MANAGER"
       ).length,
     },
     {
@@ -324,7 +324,7 @@ const AllUsersPage = () => {
                     <th>Email</th>
                     <th>Role</th>
                     <th>Status</th>
-                    <th>Member ID</th>
+                    <th>ID</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
