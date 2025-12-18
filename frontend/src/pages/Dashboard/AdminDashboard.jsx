@@ -1,25 +1,23 @@
 import { useState } from 'react';
-import { DashboardLayout, Container } from '../components/Layout';
-import { Card, CardBody, CardHeader } from '../components/Card';
-import { Button } from '../components/Button';
-import { Badge } from '../components/Badge';
-import { Table } from '../components/Table';
-import { Modal } from '../components/Modal';
-import { Input, Select } from '../components/Input';
-import { useAuth } from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import DashboardLayout from './DashboardLayout';
+import { Card, CardBody } from '../../components/Card';
+import { Button } from '../../components/Button';
+import { Badge } from '../../components/Badge';
+import { Table } from '../../components/Table';
+import { Modal } from '../../components/Modal';
+import { Input, Select } from '../../components/Input';
+import { useAuth } from '../../context/AuthContext';
 import './Dashboard.css';
 
-export const AdminDashboard = () => {
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
+const AdminDashboard = () => {
+  const { user } = useAuth();
   const [showAddUser, setShowAddUser] = useState(false);
 
   const users = [
-    { id: 1, name: 'John Doe', email: 'john@example.com', role: 'contributor', status: 'active', joinDate: '2025-01-01' },
-    { id: 2, name: 'Jane Smith', email: 'jane@example.com', role: 'manager', status: 'active', joinDate: '2025-01-02' },
-    { id: 3, name: 'Admin User', email: 'admin@example.com', role: 'admin', status: 'active', joinDate: '2024-12-01' },
-    { id: 4, name: 'Bob Johnson', email: 'bob@example.com', role: 'contributor', status: 'inactive', joinDate: '2025-01-03' },
+    { id: 1, name: 'John Doe', email: 'john@example.com', role: 'MEMBER', status: 'active', joinDate: '2025-01-01' },
+    { id: 2, name: 'Jane Smith', email: 'jane@example.com', role: 'MANAGER', status: 'active', joinDate: '2025-01-02' },
+    { id: 3, name: 'Admin User', email: 'admin@example.com', role: 'ADMIN', status: 'active', joinDate: '2024-12-01' },
+    { id: 4, name: 'Bob Johnson', email: 'bob@example.com', role: 'MEMBER', status: 'inactive', joinDate: '2025-01-03' },
   ];
 
   const systemStats = [
@@ -36,25 +34,6 @@ export const AdminDashboard = () => {
     { id: 4, action: 'User Deactivated', user: 'Bob Johnson', timestamp: '1 day ago', type: 'warning' },
   ];
 
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
-  };
-
-  const sidebarItems = [
-    { icon: '📊', label: 'Dashboard', path: '/admin-dashboard', active: true },
-    { icon: '👥', label: 'Users', path: '/admin-dashboard', active: false },
-    { icon: '📈', label: 'Analytics', path: '/admin-dashboard', active: false },
-    { icon: '⚙️', label: 'Settings', path: '/admin-dashboard', active: false },
-    { icon: '🔒', label: 'Security', path: '/admin-dashboard', active: false },
-  ];
-
-  const navItems = [
-    { label: 'Dashboard', path: '/admin-dashboard', active: true },
-    { label: 'Users', path: '/admin-dashboard', active: false },
-    { label: 'Analytics', path: '/admin-dashboard', active: false },
-  ];
-
   const userColumns = [
     { key: 'name', label: 'Name', width: '20%' },
     { key: 'email', label: 'Email', width: '25%' },
@@ -63,7 +42,7 @@ export const AdminDashboard = () => {
       label: 'Role',
       width: '15%',
       render: (role) => (
-        <Badge variant={role === 'admin' ? 'danger' : role === 'manager' ? 'warning' : 'info'}>
+        <Badge variant={role === 'ADMIN' ? 'danger' : role === 'MANAGER' ? 'warning' : 'info'}>
           {role}
         </Badge>
       ),
@@ -98,19 +77,11 @@ export const AdminDashboard = () => {
   ];
 
   return (
-    <DashboardLayout
-      sidebarItems={sidebarItems}
-      navItems={navItems}
-      userRole="Admin"
-      userName={user?.email || 'Admin'}
-      onLogout={handleLogout}
-    >
-      <Container>
-        {/* Welcome Section */}
-        <div className="welcome-section">
-          <h1>Welcome, Admin! 👋</h1>
-          <p>System overview and management tools</p>
-        </div>
+    <DashboardLayout role="ADMIN">
+      <div className="welcome-section">
+        <h1>Welcome, {user?.name?.split(' ')[0]}! 👋</h1>
+        <p>System overview and management tools</p>
+      </div>
 
         {/* System Stats */}
         <div className="stats-grid">
@@ -146,7 +117,6 @@ export const AdminDashboard = () => {
           <h2>📋 Activity Log</h2>
           <Table columns={activityColumns} data={activityLog} />
         </div>
-      </Container>
 
       {/* Add User Modal */}
       <Modal
@@ -162,9 +132,9 @@ export const AdminDashboard = () => {
           <Select
             label="Role"
             options={[
-              { value: 'student', label: 'Student' },
-              { value: 'teacher', label: 'Teacher' },
-              { value: 'admin', label: 'Admin' },
+              { value: 'MEMBER', label: 'Member' },
+              { value: 'MANAGER', label: 'Manager' },
+              { value: 'ADMIN', label: 'Admin' },
             ]}
             fullWidth
           />
@@ -185,3 +155,5 @@ export const AdminDashboard = () => {
     </DashboardLayout>
   );
 };
+
+export default AdminDashboard;

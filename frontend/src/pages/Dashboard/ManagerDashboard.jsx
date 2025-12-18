@@ -1,18 +1,16 @@
 import { useState } from 'react';
-import { DashboardLayout, Container } from '../components/Layout';
-import { Card, CardBody, CardHeader } from '../components/Card';
-import { Button } from '../components/Button';
-import { Badge } from '../components/Badge';
-import { Table } from '../components/Table';
-import { Modal } from '../components/Modal';
-import { Input, Textarea, Select } from '../components/Input';
-import { useAuth } from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import DashboardLayout from './DashboardLayout';
+import { Card, CardBody } from '../../components/Card';
+import { Button } from '../../components/Button';
+import { Badge } from '../../components/Badge';
+import { Table } from '../../components/Table';
+import { Modal } from '../../components/Modal';
+import { Input, Textarea, Select } from '../../components/Input';
+import { useAuth } from '../../context/AuthContext';
 import './Dashboard.css';
 
-export const ManagerDashboard = () => {
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
+const ManagerDashboard = () => {
+  const { user } = useAuth();
   const [showCreateAssignment, setShowCreateAssignment] = useState(false);
   const [assignments, setAssignments] = useState([
     {
@@ -47,25 +45,6 @@ export const ManagerDashboard = () => {
     { id: 3, name: 'Bob Johnson', email: 'bob@example.com', submissions: 20, avgGrade: 'Good' },
   ];
 
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
-  };
-
-  const sidebarItems = [
-    { icon: '📊', label: 'Dashboard', path: '/manager-dashboard', active: true },
-    { icon: '📋', label: 'Deliverables', path: '/manager-dashboard', active: false },
-    { icon: '👥', label: 'Team Members', path: '/manager-dashboard', active: false },
-    { icon: '📈', label: 'Analytics', path: '/manager-dashboard', active: false },
-    { icon: '⚙️', label: 'Settings', path: '/manager-dashboard', active: false },
-  ];
-
-  const navItems = [
-    { label: 'Dashboard', path: '/manager-dashboard', active: true },
-    { label: 'Deliverables', path: '/manager-dashboard', active: false },
-    { label: 'Team Members', path: '/manager-dashboard', active: false },
-  ];
-
   const assignmentColumns = [
     { key: 'title', label: 'Deliverable', width: '30%' },
     { key: 'course', label: 'Project', width: '15%' },
@@ -91,18 +70,10 @@ export const ManagerDashboard = () => {
   ];
 
   return (
-    <DashboardLayout
-      sidebarItems={sidebarItems}
-      navItems={navItems}
-      userRole="Teacher"
-      userName={user?.email || 'Teacher'}
-      onLogout={handleLogout}
-    >
-      <Container>
-        {/* Welcome Section */}
-        <div className="welcome-section">
-          <h1>Welcome, {user?.email?.split('@')[0]}! 👋</h1>
-          <p>Manage your projects and track team progress</p>
+    <DashboardLayout role="MANAGER">
+      <div className="welcome-section">
+        <h1>Welcome, {user?.name?.split(' ')[0]}! 👋</h1>
+        <p>Manage your projects and track team progress</p>
         </div>
 
         {/* Stats Cards */}
@@ -154,9 +125,8 @@ export const ManagerDashboard = () => {
           <h2>👥 Team Overview</h2>
           <Table columns={studentColumns} data={students} />
         </div>
-      </Container>
 
-      {/* Create Assignment Modal */}
+        {/* Create Assignment Modal */}
       <Modal
         isOpen={showCreateAssignment}
         title="Create New Project"
@@ -193,3 +163,5 @@ export const ManagerDashboard = () => {
     </DashboardLayout>
   );
 };
+
+export default ManagerDashboard;

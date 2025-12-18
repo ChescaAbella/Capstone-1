@@ -1,18 +1,16 @@
 import { useState } from 'react';
-import { DashboardLayout, Container } from '../components/Layout';
-import { Card, CardBody, CardHeader } from '../components/Card';
-import { Button } from '../components/Button';
-import { Badge } from '../components/Badge';
-import { Table } from '../components/Table';
-import { Modal } from '../components/Modal';
-import { Input, Textarea } from '../components/Input';
-import { useAuth } from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import DashboardLayout from './DashboardLayout';
+import { Card, CardBody } from '../../components/Card';
+import { Button } from '../../components/Button';
+import { Badge } from '../../components/Badge';
+import { Table } from '../../components/Table';
+import { Modal } from '../../components/Modal';
+import { Input, Textarea } from '../../components/Input';
+import { useAuth } from '../../context/AuthContext';
 import './Dashboard.css';
 
-export const ContributorDashboard = () => {
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
+const MemberDashboard = () => {
+  const { user } = useAuth();
   const [showAssistant, setShowAssistant] = useState(false);
   const [assistantMessage, setAssistantMessage] = useState('');
 
@@ -73,25 +71,6 @@ export const ContributorDashboard = () => {
     },
   ];
 
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
-  };
-
-  const sidebarItems = [
-    { icon: '📊', label: 'Dashboard', path: '/contributor-dashboard', active: true },
-    { icon: '📤', label: 'Submissions', path: '/contributor-dashboard', active: false },
-    { icon: '📋', label: 'Deliverables', path: '/contributor-dashboard', active: false },
-    { icon: '⏰', label: 'Deadlines', path: '/contributor-dashboard', active: false },
-    { icon: '📈', label: 'Progress', path: '/contributor-dashboard', active: false },
-  ];
-
-  const navItems = [
-    { label: 'Dashboard', path: '/contributor-dashboard', active: true },
-    { label: 'Submissions', path: '/contributor-dashboard', active: false },
-    { label: 'Deliverables', path: '/contributor-dashboard', active: false },
-  ];
-
   const submissionColumns = [
     { key: 'title', label: 'Deliverable', width: '30%' },
     { key: 'course', label: 'Project', width: '15%' },
@@ -130,20 +109,11 @@ export const ContributorDashboard = () => {
   ];
 
   return (
-    <DashboardLayout
-      sidebarItems={sidebarItems}
-      navItems={navItems}
-      userRole="Student"
-      userName={user?.email || 'Student'}
-      onLogout={handleLogout}
-    >
-      <Container>
-        {/* Welcome Section */}
-        <div className="welcome-section">
-          <h1>Welcome, {user?.email?.split('@')[0]}! 👋</h1>
-          <p>Here's your submission overview and upcoming deadlines</p>
-        </div>
-
+    <DashboardLayout role="MEMBER">
+      <div className="welcome-section">
+        <h1>Welcome, {user?.name?.split(' ')[0]}! 👋</h1>
+        <p>Here's your submission overview and upcoming deadlines</p>
+      </div>
         {/* Stats Cards */}
         <div className="stats-grid">
           <Card>
@@ -200,48 +170,35 @@ export const ContributorDashboard = () => {
           <h2>📤 Your Submissions</h2>
           <Table columns={submissionColumns} data={submissions} />
         </div>
-      </Container>
 
-      {/* AI Assistant Modal */}
-      <Modal
-        isOpen={showAssistant}
-        title="AI Deadline Assistant"
-        onClose={() => {
-          setShowAssistant(false);
-          setAssistantMessage('');
-        }}
-        size="md"
-      >
-        <div className="ai-chat">
-          <div className="chat-messages">
-            <div className="message ai-message">
-              <p>Hi! I'm your AI assistant. I can help you:</p>
-              <ul>
-                <li>Predict upcoming deadlines</li>
-                <li>Suggest optimal submission times</li>
-                <li>Analyze your submission patterns</li>
-                <li>Recommend study strategies</li>
-              </ul>
-            </div>
-            {assistantMessage && (
-              <div className="message user-message">
-                <p>{assistantMessage}</p>
+        {/* AI Assistant Modal */}
+        <Modal
+          isOpen={showAssistant}
+          title="AI Deadline Assistant"
+          onClose={() => setShowAssistant(false)}
+          size="lg"
+        >
+          <div className="assistant-chat">
+            <div className="chat-messages">
+              <div className="message ai-message">
+                <p>Hello! I'm your AI assistant. I can help you with deadline management, submission tips, and academic insights. How can I help you today?</p>
               </div>
-            )}
+            </div>
+            <div className="chat-input-area">
+              <Textarea
+                value={assistantMessage}
+                onChange={(e) => setAssistantMessage(e.target.value)}
+                placeholder="Ask me anything about your deadlines..."
+                fullWidth
+              />
+              <Button variant="primary" fullWidth>
+                Send Message
+              </Button>
+            </div>
           </div>
-          <div className="chat-input">
-            <Input
-              placeholder="Ask the AI assistant..."
-              value={assistantMessage}
-              onChange={(e) => setAssistantMessage(e.target.value)}
-              fullWidth
-            />
-            <Button variant="primary" onClick={() => setAssistantMessage('')}>
-              Send
-            </Button>
-          </div>
-        </div>
-      </Modal>
+        </Modal>
     </DashboardLayout>
   );
 };
+
+export default MemberDashboard;

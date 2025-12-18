@@ -21,30 +21,34 @@ export const LoginPage = () => {
     setError('');
     setLoading(true);
 
-    // Simulate API call
-    setTimeout(() => {
-      if (email && password) {
-        login(email, password, role);
-        
-        // Redirect based on role
-        switch (role) {
-          case 'contributor':
-            navigate('/contributor-dashboard');
-            break;
-          case 'manager':
-            navigate('/manager-dashboard');
-            break;
-          case 'admin':
-            navigate('/admin-dashboard');
-            break;
-          default:
-            navigate('/');
+    // Call backend API
+    fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'}/api/auth/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email, password, role }),
+    })
+      .then((res) => {
+        if (!res.ok) {
+          return res.json().then((data) => {
+            throw new Error(data.error || 'Invalid credentials');
+          });
         }
-      } else {
-        setError('Please fill in all fields');
-      }
-      setLoading(false);
-    }, 1000);
+        return res.json();
+      })
+      .then((data) => {
+        login(data.token, data.user, role);
+        
+        // Redirect to dashboard (role-based routing happens in App.jsx)
+        navigate('/dashboard');
+      })
+      .catch((err) => {
+        setError(err.message || 'Login failed. Please try again.');
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   };
 
   return (
@@ -110,16 +114,6 @@ export const LoginPage = () => {
             <p>
               Don't have an account? <Link to="/register">Sign Up</Link>
             </p>
-          </div>
-
-          <div className="auth-demo">
-            <p className="demo-title">Demo Credentials:</p>
-            <ul>
-              <li><strong>Contributor:</strong> contributor@example.com</li>
-              <li><strong>Manager:</strong> manager@example.com</li>
-              <li><strong>Admin:</strong> admin@example.com</li>
-            </ul>
-            <p className="demo-note">Any password will work</p>
           </div>
         </div>
       </Container>

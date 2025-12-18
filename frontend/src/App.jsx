@@ -3,9 +3,13 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { LandingPage } from './pages/LandingPage';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
-import { ContributorDashboard } from './pages/ContributorDashboard';
-import { ManagerDashboard } from './pages/ManagerDashboard';
-import { AdminDashboard } from './pages/AdminDashboard';
+import { VerificationPage } from './pages/VerificationPage';
+import { ProfilePage } from './pages/Profile/ProfilePage';
+import { AdminPanel } from './pages/AdminPanel';
+import MemberDashboard from './pages/Dashboard/MemberDashboard';
+import ManagerDashboard from './pages/Dashboard/ManagerDashboard';
+import AdminDashboard from './pages/Dashboard/AdminDashboard';
+import MockUserPanel from './components/MockUserPanel';
 import './styles/global.css';
 
 // Protected Route Component
@@ -29,30 +33,31 @@ function AppContent() {
       <Route path="/" element={<LandingPage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
+      <Route path="/verify" element={<VerificationPage />} />
       
       <Route
-        path="/contributor-dashboard"
+        path="/profile"
         element={
-          <ProtectedRoute requiredRole="contributor">
-            <ContributorDashboard />
+          <ProtectedRoute>
+            <ProfilePage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/admin"
+        element={
+          <ProtectedRoute requiredRole="ADMIN">
+            <AdminPanel />
           </ProtectedRoute>
         }
       />
       
       <Route
-        path="/manager-dashboard"
+        path="/dashboard"
         element={
-          <ProtectedRoute requiredRole="manager">
-            <ManagerDashboard />
-          </ProtectedRoute>
-        }
-      />
-      
-      <Route
-        path="/admin-dashboard"
-        element={
-          <ProtectedRoute requiredRole="admin">
-            <AdminDashboard />
+          <ProtectedRoute>
+            <DashboardRouter />
           </ProtectedRoute>
         }
       />
@@ -62,11 +67,27 @@ function AppContent() {
   );
 }
 
+// Dashboard Router Component
+function DashboardRouter() {
+  const { user } = useAuth();
+
+  if (user?.role === 'MEMBER') {
+    return <MemberDashboard />;
+  } else if (user?.role === 'MANAGER') {
+    return <ManagerDashboard />;
+  } else if (user?.role === 'ADMIN') {
+    return <AdminDashboard />;
+  }
+
+  return <Navigate to="/" />;
+}
+
 function App() {
   return (
     <Router>
       <AuthProvider>
         <AppContent />
+        <MockUserPanel />
       </AuthProvider>
     </Router>
   );

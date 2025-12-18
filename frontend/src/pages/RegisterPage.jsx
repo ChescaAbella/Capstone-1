@@ -11,13 +11,15 @@ export const RegisterPage = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
   const [formData, setFormData] = useState({
-    fullName: '',
+    name: '',
     email: '',
     password: '',
     confirmPassword: '',
-    role: 'contributor',
+    studentId: '',
+    team: '',
   });
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
@@ -31,11 +33,12 @@ export const RegisterPage = () => {
   const handleRegister = (e) => {
     e.preventDefault();
     setError('');
+    setSuccess('');
     setLoading(true);
 
     // Validation
-    if (!formData.fullName || !formData.email || !formData.password || !formData.confirmPassword) {
-      setError('Please fill in all fields');
+    if (!formData.name || !formData.email || !formData.password || !formData.confirmPassword) {
+      setError('Please fill in all required fields');
       setLoading(false);
       return;
     }
@@ -52,26 +55,50 @@ export const RegisterPage = () => {
       return;
     }
 
-    // Simulate API call
-    setTimeout(() => {
-      // Auto-login after registration
-      login(formData.email, formData.password, formData.role);
-      
-      // Redirect based on role
-      switch (formData.role) {
-        case 'contributor':
-          navigate('/contributor-dashboard');
-          break;
-        case 'manager':
-          navigate('/manager-dashboard');
-          break;
-        case 'admin':
-          navigate('/admin-dashboard');
-          break;
-        default:
-          navigate('/');
-      }
-    }, 1000);
+    // Call backend API
+    fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'}/api/auth/register`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        email: formData.email,
+        password: formData.password,
+        name: formData.name,
+        studentId: formData.studentId,
+        team: formData.team,
+      }),
+    })
+      .then((res) => {
+        if (!res.ok) {
+          return res.json().then((data) => {
+            throw new Error(data.error || 'Registration failed');
+          });
+        }
+        return res.json();
+      })
+      .then((data) => {
+        setSuccess('Registration successful! Check your email to verify your account.');
+        // Clear form
+        setFormData({
+          name: '',
+          email: '',
+          password: '',
+          confirmPassword: '',
+          studentId: '',
+          team: '',
+        });
+        // Redirect to login after 2 seconds
+        setTimeout(() => {
+          navigate('/login');
+        }, 2000);
+      })
+      .catch((err) => {
+        setError(err.message || 'Registration failed. Please try again.');
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   };
 
   return (
@@ -92,23 +119,54 @@ export const RegisterPage = () => {
             />
           )}
 
+          {success && (
+            <Alert
+              type="success"
+              title="Success"
+              message={success}
+              onClose={() => setSuccess('')}
+            />
+          )}
+
           <form onSubmit={handleRegister} className="auth-form">
             <Input
               label="Full Name"
               type="text"
-              name="fullName"
+              name="name"
               placeholder="John Doe"
-              value={formData.fullName}
+              value={formData.name}
+              onChange={handleChange}
+              disabled={loading}
+              required
+            />
+
+            <Input
+              label="Email (Institutional)"
+              type="email"
+              name="email"
+              placeholder="john@school.edu"
+              value={formData.email}
+              onChange={handleChange}
+              disabled={loading}
+              required
+            />
+
+            <Input
+              label="Student ID (Optional)"
+              type="text"
+              name="studentId"
+              placeholder="2024-001"
+              value={formData.studentId}
               onChange={handleChange}
               disabled={loading}
             />
 
             <Input
-              label="Email"
-              type="email"
-              name="email"
-              placeholder="john@example.com"
-              value={formData.email}
+              label="Team (Optional)"
+              type="text"
+              name="team"
+              placeholder="Team A"
+              value={formData.team}
               onChange={handleChange}
               disabled={loading}
             />
@@ -121,6 +179,7 @@ export const RegisterPage = () => {
               value={formData.password}
               onChange={handleChange}
               disabled={loading}
+              required
             />
 
             <Input
@@ -131,19 +190,7 @@ export const RegisterPage = () => {
               value={formData.confirmPassword}
               onChange={handleChange}
               disabled={loading}
-            />
-
-            <Select
-              label="Role"
-              name="role"
-              options={[
-                { value: 'contributor', label: 'Contributor / Submitter' },
-                { value: 'manager', label: 'Manager / Coordinator' },
-                { value: 'admin', label: 'Administrator' },
-              ]}
-              value={formData.role}
-              onChange={handleChange}
-              disabled={loading}
+              required
             />
 
             <Button
@@ -160,16 +207,6 @@ export const RegisterPage = () => {
             <p>
               Already have an account? <Link to="/login">Sign In</Link>
             </p>
-          </div>
-
-          <div className="auth-demo">
-            <p className="demo-title">Demo Accounts:</p>
-            <ul>
-              <li><strong>Contributor:</strong> contributor@example.com</li>
-              <li><strong>Manager:</strong> manager@example.com</li>
-              <li><strong>Admin:</strong> admin@example.com</li>
-            </ul>
-            <p className="demo-note">Password: any 6+ character string</p>
           </div>
         </div>
       </Container>

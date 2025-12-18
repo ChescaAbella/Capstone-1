@@ -1,6 +1,5 @@
 import './Layout.css';
 import { Navbar } from './Navbar';
-import { Sidebar } from './Sidebar';
 
 export const DashboardLayout = ({ 
   children, 
@@ -8,6 +7,7 @@ export const DashboardLayout = ({
   sidebarItems = [],
   userRole = '',
   userName = '',
+  userPicture = '',
   onLogout = null
 }) => {
   return (
@@ -19,7 +19,6 @@ export const DashboardLayout = ({
         onLogout={onLogout}
       />
       <div className="dashboard-container">
-        <Sidebar items={sidebarItems} userName={userName} />
         <main className="dashboard-main">
           {children}
         </main>

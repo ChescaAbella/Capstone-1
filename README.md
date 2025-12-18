@@ -6,10 +6,10 @@ A web-based Deliverable Submission and Tracking System enhanced with AI-powered 
 
 ## 🧩 Tech Stack Used
 
-- **Backend:** Spring Boot 3.2.0 (Java 21)
+- **Backend:** Spring Boot 4.0.0 (Java 21)
 - **Frontend:** React.js 19 + Vite 7
-- **Database:** PostgreSQL
-- **Authentication:** JWT + OAuth 2.0
+- **Database:** Supabase (PostgreSQL)
+- **Authentication:** JWT + OAuth 2.0 (Google)
 - **Security:** Spring Security
 - **ORM:** Hibernate/JPA
 
@@ -19,15 +19,16 @@ A web-based Deliverable Submission and Tracking System enhanced with AI-powered 
 
 Before you begin, ensure you have:
 
-- **Java 17 or higher** - [Download](https://www.oracle.com/java/technologies/downloads/)
+- **Java 21 or higher** - [Download](https://www.oracle.com/java/technologies/downloads/)
 - **Maven 3.9+** - [Download](https://maven.apache.org/download.cgi)
 - **Node.js 18+** - [Download](https://nodejs.org/)
 - **Git** - [Download](https://git-scm.com/)
+- **Supabase Account** - [Sign up](https://supabase.com/)
 
 Verify installation:
 
 ```bash
-java --version    # Should show 17.x.x or higher
+java --version    # Should show 21.x.x or higher
 mvn --version     # Should show 3.9.x
 node --version    # Should show 18.x.x or higher
 ```
@@ -67,18 +68,22 @@ copy src\main\resources\application.properties.example src\main\resources\applic
 cp src/main/resources/application.properties.example src/main/resources/application.properties
 ```
 
-### Step 2: Fill in Credentials
+### Step 2: Set Environment Variables
 
-Open `backend/src/main/resources/application.properties` and update:
+Create a `.env` file in the `backend` directory with your Supabase credentials:
 
 ```properties
-# Line 8: Database password
-spring.datasource.password=YOUR_DB_PASSWORD_HERE
+SUPABASE_HOST=your-project.supabase.co
+SUPABASE_DB_NAME=postgres
+SUPABASE_USERNAME=postgres
+SUPABASE_PASSWORD=your-database-password
 
-# Line 18-19: OAuth credentials
-spring.security.oauth2.client.registration.google.client-id=YOUR_CLIENT_ID_HERE
-spring.security.oauth2.client.registration.google.client-secret=YOUR_CLIENT_SECRET_HERE
+# OAuth credentials (optional, for Google login)
+SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_GOOGLE_CLIENT_ID=your-client-id
+SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_GOOGLE_CLIENT_SECRET=your-client-secret
 ```
+
+Or set them as system environment variables before running the application.
 
 ### Step 3: Run Backend
 
@@ -265,12 +270,34 @@ npm run dev
 
 ### Authentication Endpoints
 
-| Method | Endpoint           | Description             |
-| ------ | ------------------ | ----------------------- |
-| POST   | `/api/auth/google` | Login with Google OAuth |
-| GET    | `/api/auth/user`   | Get current user info   |
-| POST   | `/api/auth/logout` | Logout user             |
-| GET    | `/api/auth/test`   | Health check endpoint   |
+| Method | Endpoint                        | Description                          |
+| ------ | ------------------------------- | ------------------------------------ |
+| POST   | `/api/auth/register`            | Register with email and password     |
+| POST   | `/api/auth/register-oauth`      | Register/login with OAuth provider   |
+| POST   | `/api/auth/login`               | Login with credentials               |
+| POST   | `/api/auth/verify/{token}`      | Verify email address                 |
+| GET    | `/api/auth/test`                | Health check endpoint                |
+
+### User Profile Endpoints
+
+| Method | Endpoint                        | Description                          |
+| ------ | ------------------------------- | ------------------------------------ |
+| GET    | `/api/users/{id}`               | Get user profile                     |
+| PUT    | `/api/users/{id}`               | Update user profile                  |
+
+### Admin Management Endpoints
+
+| Method | Endpoint                          | Description                          |
+| ------ | --------------------------------- | ------------------------------------ |
+| GET    | `/api/admin/users`                | List all users (admin only)          |
+| GET    | `/api/admin/users/{id}`           | Get user details (admin only)        |
+| POST   | `/api/admin/users`                | Create new user (admin only)         |
+| PUT    | `/api/admin/users/{id}`           | Update user (admin only)             |
+| PUT    | `/api/admin/users/{id}/role`      | Change user role (admin only)        |
+| PUT    | `/api/admin/users/{id}/deactivate`| Deactivate user (admin only)         |
+| PUT    | `/api/admin/users/{id}/reactivate`| Reactivate user (admin only)         |
+| GET    | `/api/admin/audit-logs`           | Get all audit logs (admin only)      |
+| GET    | `/api/admin/audit-logs/user/{id}` | Get audit logs for user (admin only) |
 
 ### Deliverable Endpoints
 
@@ -304,25 +331,31 @@ npm run preview            # Preview production build
 
 ## 📊 Project Status
 
-**Current Version:** 0.2.0 (MVP with Registration)  
-**Status:** Core frontend functionality complete, backend in development  
+**Current Version:** 0.4.0 (Module 1: Complete + Admin Management)  
+**Status:** Full authentication, profile management, and admin controls implemented  
 **Last Updated:** December 2025
 
 ### Completed ✅
-- Landing page with feature showcase
-- Authentication system (Login & Register)
+- User registration with institutional email validation
+- Email verification workflow with token expiry
+- OAuth 2.0 infrastructure (Google ready)
 - Role-based access control (Contributor, Manager, Admin)
-- Contributor dashboard
-- Manager dashboard
-- Administrator dashboard
+- User profile management and editing
+- Admin dashboard with user management
+- Admin role and account administration
+- Audit logging for all admin actions
+- Account activation/deactivation
+- Role assignment and revocation
+- Contributor, Manager, and Admin dashboards
 - Responsive design across all pages
 - Reusable component library
+- Spring Boot backend with Spring Security
+- Supabase PostgreSQL integration
 
 ### In Progress 🔄
-- Backend API development (Spring Boot)
-- Database integration (PostgreSQL)
-- Google OAuth 2.0 integration
-- Real AI predictions
+- Gmail API integration for email sending
+- Google OAuth 2.0 complete implementation
+- Module 2: Deliverable Tracker
 
 ### Planned 📋
 - Email notifications
@@ -342,7 +375,7 @@ This project is developed as an educational capstone project.
 
 | Name                             | Role                                  | CIT-U Email                     | GitHub                                           |
 | -------------------------------- | ------------------------------------- | ------------------------------- | ------------------------------------------------ |
-| **Abella, Franchesca Louise R.** | Project Leader & Lead Developer | franchescalouise.abella@cit.edu | [@chescaabella](https://github.com/chescaabella) |
+| **Abella, Franchesca Louise R.** | Frontend Developer | franchescalouise.abella@cit.edu | [@chescaabella](https://github.com/chescaabella) |
 | **Alcarez, Johannah Rhey S.** | Frontend Developer    | johannahrhey.alcarez@cit.edu | [@lovenahnah](https://github.com/lovenahnah) |
 | **Gilbuena, Chelter Matthew T.** | Backend Developer     | cheltermatthew.gilbuena@cit.edu    | [@cm6322](https://github.com/cm6322)   |
 | **Morre, Lyndon Luke A.** | Backend Developer      | lyndonluke.morre@cit.edu     | [@Mores20](https://github.com/Mores20)         |
@@ -360,8 +393,9 @@ For issues, feature requests, or questions:
 ## 🙏 Acknowledgments
 
 - **IT Department Faculty** - For guidance and support
-- **PostgreSQL** - For database
+- **Supabase** - For managed PostgreSQL database and real-time capabilities
 - **Google Cloud Platform** - For OAuth authentication
+- **Spring Framework** - For enterprise Java development
 
 ---
 

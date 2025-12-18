@@ -1,0 +1,23 @@
+.dashboard-layout {
+  display: flex;
+  min-height: 100vh;
+  background-color: var(--bg-secondary, #f5f7fa);
+}
+
+.dashboard-content {
+  flex: 1;
+  padding: var(--spacing-xl, 24px);
+  overflow-y: auto;
+  background-color: var(--bg-secondary, #f5f7fa);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .dashboard-layout {
+    flex-direction: column;
+  }
+
+  .dashboard-content {
+    padding: var(--spacing-lg, 16px);
+  }
+}
