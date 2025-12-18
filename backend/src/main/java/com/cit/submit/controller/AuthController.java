@@ -60,6 +60,16 @@ public class AuthController {
         }
     }
 
+    @PostMapping("/google")
+    public ResponseEntity<?> googleAuth(@RequestBody GoogleAuthRequest request) {
+        try {
+            LoginResponse response = authService.authenticateWithGoogle(request.getToken());
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
+        }
+    }
+
     @GetMapping("/test")
     public ResponseEntity<?> test() {
         return ResponseEntity.ok(new MessageResponse("Backend is working!"));
@@ -95,5 +105,14 @@ public class AuthController {
         public void setOauthProvider(String oauthProvider) { this.oauthProvider = oauthProvider; }
         public String getOauthId() { return oauthId; }
         public void setOauthId(String oauthId) { this.oauthId = oauthId; }
+    }
+
+    static class GoogleAuthRequest {
+        public String token;
+
+        public GoogleAuthRequest() {}
+
+        public String getToken() { return token; }
+        public void setToken(String token) { this.token = token; }
     }
 }

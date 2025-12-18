@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.Base64;
 import java.util.UUID;
+import java.util.Map;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
 public class AuthService {
@@ -113,6 +115,77 @@ public class AuthService {
                 user.getRole().toString(),
                 user.getName()
         ));
+    }
+
+    public LoginResponse authenticateWithGoogle(String googleToken) throws Exception {
+        try {
+            // Decode the Google JWT token (already verified by Google frontend)
+            // Format: header.payload.signature
+            String[] parts = googleToken.split("\\.");
+            if (parts.length != 3) {
+                throw new Exception("Invalid token format");
+            }
+
+            // Decode the payload (second part)
+            String payload = new String(Base64.getUrlDecoder().decode(parts[1]));
+            
+            // Parse JSON payload
+            ObjectMapper objectMapper = new ObjectMapper();
+            Map<String, Object> tokenPayload = objectMapper.readValue(payload, Map.class);
+
+            // Extract user information from token
+            String email = (String) tokenPayload.get("email");
+            String name = (String) tokenPayload.get("name");
+            String picture = (String) tokenPayload.get("picture");
+
+            if (email == null) {
+                throw new Exception("Email not found in token");
+            }
+
+            // Validate institutional email
+            if (!EmailValidationService.isValidInstitutionalEmail(email)) {
+                throw new Exception("Please use an institutional email address");
+            }
+
+            // Check if user exists
+            User user = userRepository.findByEmail(email).orElse(null);
+
+            if (user == null) {
+                // Create new user with Google OAuth
+                user = new User();
+                user.setEmail(email);
+                user.setName(name);
+                user.setAuthProvider("google");
+                user.setPictureUrl(picture);
+                user.setRole(UserRole.MEMBER);
+                user.setEmailVerified(true);
+                user.setAccountStatus("ACTIVE");
+                user.setPasswordHash(""); // OAuth users don't have password
+                user = userRepository.save(user);
+            } else {
+                // Update existing user
+                user.setAuthProvider("google");
+                user.setEmailVerified(true);
+                user.setAccountStatus("ACTIVE");
+                if (picture != null) {
+                    user.setPictureUrl(picture);
+                }
+                user = userRepository.save(user);
+            }
+
+            // Generate backend JWT token
+            String token = generateToken(user);
+
+            return new LoginResponse(token, new LoginResponse.UserInfo(
+                    user.getId(),
+                    user.getEmail(),
+                    user.getRole().toString(),
+                    user.getName()
+            ));
+
+        } catch (Exception e) {
+            throw new Exception("Google token verification failed: " + e.getMessage());
+        }
     }
 
     public void verifyEmail(String token) throws Exception {

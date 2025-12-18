@@ -1,15 +1,17 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 import { AuthLayout, Container } from '../components/Layout';
 import { Button } from '../components/Button';
 import { Input, Select } from '../components/Input';
 import { Alert } from '../components/Alert';
 import { useAuth } from '../context/AuthContext';
+import { GOOGLE_CLIENT_ID } from '../services/googleOAuth';
 import './Auth.css';
 
 export const RegisterPage = () => {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, loginWithGoogle } = useAuth();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -21,6 +23,7 @@ export const RegisterPage = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -101,6 +104,23 @@ export const RegisterPage = () => {
       });
   };
 
+  const handleGoogleSuccess = async (credentialResponse) => {
+    setGoogleLoading(true);
+    setError('');
+    try {
+      await loginWithGoogle(credentialResponse.credential);
+      navigate('/dashboard');
+    } catch (err) {
+      setError(err.message || 'Google registration failed. Please try again.');
+      setGoogleLoading(false);
+    }
+  };
+
+  const handleGoogleError = () => {
+    setError('Google registration failed. Please try again.');
+    setGoogleLoading(false);
+  };
+
   return (
     <AuthLayout>
       <Container>
@@ -128,6 +148,32 @@ export const RegisterPage = () => {
             />
           )}
 
+          {/* Google Sign-Up */}
+          {GOOGLE_CLIENT_ID && GOOGLE_CLIENT_ID !== 'YOUR_GOOGLE_CLIENT_ID' ? (
+            <>
+              <div className="google-signup-section">
+                <p className="google-signup-text">Sign up with Google</p>
+                <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+                  <div className="google-login-container">
+                    <GoogleLogin
+                      onSuccess={handleGoogleSuccess}
+                      onError={handleGoogleError}
+                      useOneTap
+                      theme="outline"
+                      size="large"
+                      width="100%"
+                    />
+                  </div>
+                </GoogleOAuthProvider>
+              </div>
+
+              {/* Divider */}
+              <div className="auth-divider">
+                <span>OR</span>
+              </div>
+            </>
+          ) : null}
+
           <form onSubmit={handleRegister} className="auth-form">
             <Input
               label="Full Name"
@@ -136,7 +182,7 @@ export const RegisterPage = () => {
               placeholder="John Doe"
               value={formData.name}
               onChange={handleChange}
-              disabled={loading}
+              disabled={loading || googleLoading}
               required
             />
 
@@ -147,7 +193,7 @@ export const RegisterPage = () => {
               placeholder="john@school.edu"
               value={formData.email}
               onChange={handleChange}
-              disabled={loading}
+              disabled={loading || googleLoading}
               required
             />
 
@@ -158,7 +204,7 @@ export const RegisterPage = () => {
               placeholder="2024-001"
               value={formData.studentId}
               onChange={handleChange}
-              disabled={loading}
+              disabled={loading || googleLoading}
             />
 
             <Input
@@ -168,7 +214,7 @@ export const RegisterPage = () => {
               placeholder="Team A"
               value={formData.team}
               onChange={handleChange}
-              disabled={loading}
+              disabled={loading || googleLoading}
             />
 
             <Input
@@ -178,7 +224,7 @@ export const RegisterPage = () => {
               placeholder="••••••••"
               value={formData.password}
               onChange={handleChange}
-              disabled={loading}
+              disabled={loading || googleLoading}
               required
             />
 
@@ -189,7 +235,7 @@ export const RegisterPage = () => {
               placeholder="••••••••"
               value={formData.confirmPassword}
               onChange={handleChange}
-              disabled={loading}
+              disabled={loading || googleLoading}
               required
             />
 
@@ -197,7 +243,7 @@ export const RegisterPage = () => {
               type="submit"
               variant="primary"
               fullWidth
-              disabled={loading}
+              disabled={loading || googleLoading}
             >
               {loading ? 'Creating Account...' : 'Create Account'}
             </Button>
