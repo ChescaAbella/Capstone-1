@@ -1,6 +1,11 @@
 import { createContext, useState, useContext, useEffect } from 'react';
-import { mockUser, mockManagerUser, mockAdminUser } from '../services/mockApi';
-import { verifyGoogleToken } from '../services/googleOAuth';
+import { 
+  getAuthTokens, 
+  storeAuthTokens, 
+  clearAuthTokens, 
+  isAuthenticated as checkAuth,
+  getAuthHeader 
+} from '../services/googleOAuth';
 
 const AuthContext = createContext();
 
@@ -8,97 +13,116 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [token, setToken] = useState(null);
+
+  // Fetch user data from backend
+  const fetchUserData = async () => {
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'}/api/auth/user`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            ...getAuthHeader(),
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch user data');
+      }
+
+      const userData = await response.json();
+      setUser(userData);
+      setIsAuthenticated(true);
+      return userData;
+    } catch (error) {
+      console.error('Failed to fetch user data:', error);
+      // Clear invalid tokens
+      clearAuthTokens();
+      setUser(null);
+      setIsAuthenticated(false);
+      throw error;
+    }
+  };
 
   // Initialize from localStorage on mount
   useEffect(() => {
-    const savedUser = localStorage.getItem('user');
-    const savedToken = localStorage.getItem('authToken');
-    if (savedUser) {
-      try {
-        setUser(JSON.parse(savedUser));
-        setIsAuthenticated(true);
-        if (savedToken) {
-          setToken(savedToken);
+    const initAuth = async () => {
+      if (checkAuth()) {
+        try {
+          await fetchUserData();
+        } catch (error) {
+          console.error('Auth initialization failed:', error);
         }
-      } catch (e) {
-        console.error('Failed to parse saved user:', e);
       }
-    }
-    setLoading(false);
+      setLoading(false);
+    };
+
+    initAuth();
   }, []);
 
-  const login = (emailOrToken, password, userData = null) => {
-    // Support both traditional login and OAuth
-    let user;
-    
-    if (userData) {
-      // OAuth login or direct user object
-      user = userData;
-    } else {
-      // Traditional login - select user based on email
-      if (emailOrToken.includes('professor') || emailOrToken.includes('manager')) {
-        user = mockManagerUser;
-      } else if (emailOrToken.includes('admin')) {
-        user = mockAdminUser;
-      } else {
-        user = mockUser;
-      }
-    }
-    
-    setUser(user);
-    setIsAuthenticated(true);
-    localStorage.setItem('user', JSON.stringify(user));
-    if (emailOrToken && typeof emailOrToken === 'string' && !password) {
-      // It's a token from OAuth
-      setToken(emailOrToken);
-      localStorage.setItem('authToken', emailOrToken);
-    }
-  };
-
-  const loginWithGoogle = async (googleToken) => {
+  // Login with tokens from OAuth callback
+  const login = async (token, refreshToken, role) => {
     try {
-      const result = await verifyGoogleToken(googleToken);
-      const { user, token } = result;
+      // Store tokens
+      storeAuthTokens(token, refreshToken, role);
       
-      setUser(user);
-      setIsAuthenticated(true);
-      setToken(token);
+      // Fetch user data
+      const userData = await fetchUserData();
       
-      localStorage.setItem('user', JSON.stringify(user));
-      localStorage.setItem('authToken', token);
-      
-      return { success: true, user };
+      return { success: true, user: userData };
     } catch (error) {
-      throw new Error(error.message || 'Google login failed');
+      clearAuthTokens();
+      throw new Error(error.message || 'Login failed');
     }
   };
 
-  const logout = () => {
-    setUser(null);
-    setIsAuthenticated(false);
-    setToken(null);
-    localStorage.removeItem('user');
-    localStorage.removeItem('authToken');
+  // Logout
+  const logout = async () => {
+    try {
+      // Call backend logout endpoint
+      await fetch(
+        `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'}/api/auth/logout`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...getAuthHeader(),
+          },
+        }
+      );
+    } catch (error) {
+      console.error('Logout API call failed:', error);
+    } finally {
+      // Clear tokens regardless of API call success
+      clearAuthTokens();
+      setUser(null);
+      setIsAuthenticated(false);
+    }
   };
 
-  // For testing: set a specific mock user
-  const setMockUser = (userType) => {
-    let userData;
-    if (userType === 'manager') {
-      userData = mockManagerUser;
-    } else if (userType === 'admin') {
-      userData = mockAdminUser;
-    } else {
-      userData = mockUser;
+  // Refresh user data
+  const refreshUser = async () => {
+    try {
+      await fetchUserData();
+    } catch (error) {
+      console.error('Failed to refresh user:', error);
     }
-    setUser(userData);
-    setIsAuthenticated(true);
-    localStorage.setItem('user', JSON.stringify(userData));
   };
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated, loading, token, login, logout, setMockUser, loginWithGoogle }}>
+    <AuthContext.Provider 
+      value={{ 
+        user, 
+        isAuthenticated, 
+        loading, 
+        login, 
+        logout, 
+        refreshUser,
+        getAuthHeader 
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

@@ -1,53 +1,78 @@
-// Google OAuth Service
-export const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || 'YOUR_GOOGLE_CLIENT_ID';
+// Google OAuth Service - Redirect Flow
 
 /**
- * Handle Google OAuth callback and verify token
- * @param {string} token - Google ID token from oauth library
- * @returns {Promise} - Backend verification result
+ * Redirect user to backend OAuth login
  */
-export const verifyGoogleToken = async (token) => {
-  try {
-    const response = await fetch(
-      `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'}/api/auth/google`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ token }),
-      }
-    );
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || 'Google authentication failed');
-    }
-
-    const data = await response.json();
-    return data; // Should contain { user, token }
-  } catch (error) {
-    throw new Error(error.message || 'Failed to verify Google token');
-  }
+export const initiateGoogleLogin = () => {
+  const backendUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
+  window.location.href = `${backendUrl}/oauth2/authorization/google`;
 };
 
 /**
- * Decode Google JWT token (client-side, for getting user info)
- * Note: This is for display purposes; always verify on backend
+ * Parse tokens from OAuth callback URL
+ * Expected URL format: /auth/callback?token=...&refreshToken=...&role=...
  */
-export const decodeGoogleToken = (token) => {
-  try {
-    const base64Url = token.split('.')[1];
-    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    const jsonPayload = decodeURIComponent(
-      atob(base64)
-        .split('')
-        .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
-        .join('')
-    );
-    return JSON.parse(jsonPayload);
-  } catch (error) {
-    console.error('Failed to decode token:', error);
-    return null;
+export const parseAuthCallback = () => {
+  const params = new URLSearchParams(window.location.search);
+  
+  const token = params.get('token');
+  const refreshToken = params.get('refreshToken');
+  const role = params.get('role');
+  const error = params.get('error');
+  const message = params.get('message');
+
+  if (error) {
+    throw new Error(message || 'Authentication failed');
   }
+
+  if (!token || !refreshToken || !role) {
+    throw new Error('Missing authentication data');
+  }
+
+  return { token, refreshToken, role };
+};
+
+/**
+ * Store authentication tokens
+ */
+export const storeAuthTokens = (token, refreshToken, role) => {
+  localStorage.setItem('accessToken', token);
+  localStorage.setItem('refreshToken', refreshToken);
+  localStorage.setItem('userRole', role);
+};
+
+/**
+ * Get stored authentication tokens
+ */
+export const getAuthTokens = () => {
+  return {
+    accessToken: localStorage.getItem('accessToken'),
+    refreshToken: localStorage.getItem('refreshToken'),
+    userRole: localStorage.getItem('userRole'),
+  };
+};
+
+/**
+ * Clear authentication tokens
+ */
+export const clearAuthTokens = () => {
+  localStorage.removeItem('accessToken');
+  localStorage.removeItem('refreshToken');
+  localStorage.removeItem('userRole');
+};
+
+/**
+ * Check if user is authenticated
+ */
+export const isAuthenticated = () => {
+  const { accessToken } = getAuthTokens();
+  return !!accessToken;
+};
+
+/**
+ * Get authorization header for API requests
+ */
+export const getAuthHeader = () => {
+  const { accessToken } = getAuthTokens();
+  return accessToken ? { Authorization: `Bearer ${accessToken}` } : {};
 };

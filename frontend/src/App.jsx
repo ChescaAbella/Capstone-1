@@ -4,6 +4,7 @@ import { LandingPage } from './pages/LandingPage';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { VerificationPage } from './pages/VerificationPage';
+import { AuthCallback } from './pages/AuthCallback';
 import { ProfilePage } from './pages/Profile/ProfilePage';
 import { AdminPanel } from './pages/AdminPanel';
 import MemberDashboard from './pages/Dashboard/MemberDashboard';
@@ -17,14 +18,29 @@ import './styles/global.css';
 
 // Protected Route Component
 const ProtectedRoute = ({ children, requiredRole }) => {
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, user, loading } = useAuth();
+
+  // Show loading state while checking authentication
+  if (loading) {
+    return (
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        minHeight: '100vh' 
+      }}>
+        <div>Loading...</div>
+      </div>
+    );
+  }
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" />;
+    return <Navigate to="/login" replace />;
   }
 
   if (requiredRole && user?.role !== requiredRole) {
-    return <Navigate to="/" />;
+    // Redirect to appropriate dashboard if wrong role
+    return <Navigate to="/dashboard" replace />;
   }
 
   return children;
@@ -38,6 +54,9 @@ function AppContent() {
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/verify" element={<VerificationPage />} />
       
+      {/* OAuth Callback Route - IMPORTANT! */}
+      <Route path="/auth/callback" element={<AuthCallback />} />
+      
       <Route
         path="/profile"
         element={
@@ -50,7 +69,7 @@ function AppContent() {
       <Route
         path="/admin"
         element={
-          <ProtectedRoute requiredRole="ADMIN">
+          <ProtectedRoute requiredRole="ADVISER">
             <AdminPanel />
           </ProtectedRoute>
         }
@@ -65,11 +84,20 @@ function AppContent() {
         }
       />
 
-      {/* Member Routes */}
+      {/* Member Routes - Changed role from MEMBER to STUDENT */}
+      <Route
+        path="/dashboard/member"
+        element={
+          <ProtectedRoute requiredRole="STUDENT">
+            <MemberDashboard />
+          </ProtectedRoute>
+        }
+      />
+
       <Route
         path="/member/deliverables"
         element={
-          <ProtectedRoute requiredRole="MEMBER">
+          <ProtectedRoute requiredRole="STUDENT">
             <MemberDeliverablesPage />
           </ProtectedRoute>
         }
@@ -78,7 +106,7 @@ function AppContent() {
       <Route
         path="/member/deliverables/:id"
         element={
-          <ProtectedRoute requiredRole="MEMBER">
+          <ProtectedRoute requiredRole="STUDENT">
             <DeliverableSubmitPage />
           </ProtectedRoute>
         }
@@ -87,30 +115,51 @@ function AppContent() {
       <Route
         path="/member/history"
         element={
-          <ProtectedRoute requiredRole="MEMBER">
+          <ProtectedRoute requiredRole="STUDENT">
             <HistoryPage />
           </ProtectedRoute>
         }
       />
+
+      {/* Manager Routes - Changed role from MANAGER to LEADER */}
+      <Route
+        path="/dashboard/manager"
+        element={
+          <ProtectedRoute requiredRole="LEADER">
+            <ManagerDashboard />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Admin Routes - Changed role from ADMIN to ADVISER */}
+      <Route
+        path="/dashboard/admin"
+        element={
+          <ProtectedRoute requiredRole="ADVISER">
+            <AdminDashboard />
+          </ProtectedRoute>
+        }
+      />
       
-      <Route path="*" element={<Navigate to="/" />} />
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }
 
-// Dashboard Router Component
+// Dashboard Router Component - Updated to match backend roles
 function DashboardRouter() {
   const { user } = useAuth();
 
-  if (user?.role === 'MEMBER') {
-    return <MemberDashboard />;
-  } else if (user?.role === 'MANAGER') {
-    return <ManagerDashboard />;
-  } else if (user?.role === 'ADMIN') {
-    return <AdminDashboard />;
+  // Map backend roles to frontend dashboards
+  if (user?.role === 'STUDENT') {
+    return <Navigate to="/dashboard/member" replace />;
+  } else if (user?.role === 'LEADER') {
+    return <Navigate to="/dashboard/manager" replace />;
+  } else if (user?.role === 'ADVISER') {
+    return <Navigate to="/dashboard/admin" replace />;
   }
 
-  return <Navigate to="/" />;
+  return <Navigate to="/" replace />;
 }
 
 function App() {
