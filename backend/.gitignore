@@ -31,3 +31,19 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Backend secrets
+.env
+application-local.properties
+src/main/resources/application-local.properties
+
+# Frontend secrets
+frontend/.env
+frontend/.env.local
+
+# Node modules
+frontend/node_modules/
+
+# Build files
+backend/target/
+frontend/dist/
