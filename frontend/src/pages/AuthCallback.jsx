@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { parseAuthCallback } from '../services/googleOAuth';
@@ -9,8 +9,13 @@ export const AuthCallback = () => {
   const { login } = useAuth();
   const [error, setError] = useState('');
   const [processing, setProcessing] = useState(true);
+  const hasRun = useRef(false); // Prevent double execution
 
   useEffect(() => {
+    // Prevent running twice in React Strict Mode
+    if (hasRun.current) return;
+    hasRun.current = true;
+
     const handleCallback = async () => {
       try {
         console.log('🔄 AuthCallback: Starting...');
@@ -45,7 +50,7 @@ export const AuthCallback = () => {
     };
 
     handleCallback();
-  }, [login, navigate]);
+  }, []); // Empty dependency array - only run once
 
   const getDashboardPath = (role) => {
     const roleMap = {
