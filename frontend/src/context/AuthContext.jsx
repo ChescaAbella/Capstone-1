@@ -17,27 +17,38 @@ export const AuthProvider = ({ children }) => {
   // Fetch user data from backend
   const fetchUserData = async () => {
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'}/api/auth/user`,
-        {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            ...getAuthHeader(),
-          },
-        }
-      );
+      const authHeader = getAuthHeader();
+      console.log('🔍 Auth header:', authHeader);
+      console.log('🔍 Tokens from localStorage:', getAuthTokens());
+      
+      const apiUrl = `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'}/api/auth/user`;
+      console.log('🔍 Fetching from:', apiUrl);
+
+      const response = await fetch(apiUrl, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          ...authHeader,
+        },
+      });
+
+      console.log('🔍 Response status:', response.status);
+      console.log('🔍 Response headers:', Object.fromEntries(response.headers.entries()));
 
       if (!response.ok) {
+        const errorText = await response.text();
+        console.error('❌ Response error:', errorText);
         throw new Error('Failed to fetch user data');
       }
 
       const userData = await response.json();
+      console.log('✅ User data received:', userData);
+      
       setUser(userData);
       setIsAuthenticated(true);
       return userData;
     } catch (error) {
-      console.error('Failed to fetch user data:', error);
+      console.error('❌ Failed to fetch user data:', error);
       // Clear invalid tokens
       clearAuthTokens();
       setUser(null);
@@ -49,12 +60,16 @@ export const AuthProvider = ({ children }) => {
   // Initialize from localStorage on mount
   useEffect(() => {
     const initAuth = async () => {
+      console.log('🔄 Initializing auth...');
       if (checkAuth()) {
+        console.log('✅ Token found in localStorage, fetching user data...');
         try {
           await fetchUserData();
         } catch (error) {
-          console.error('Auth initialization failed:', error);
+          console.error('❌ Auth initialization failed:', error);
         }
+      } else {
+        console.log('ℹ️ No token found in localStorage');
       }
       setLoading(false);
     };
@@ -65,14 +80,22 @@ export const AuthProvider = ({ children }) => {
   // Login with tokens from OAuth callback
   const login = async (token, refreshToken, role) => {
     try {
+      console.log('🔄 Login started');
+      console.log('🔍 Token length:', token?.length);
+      console.log('🔍 RefreshToken:', refreshToken?.substring(0, 20) + '...');
+      console.log('🔍 Role:', role);
+      
       // Store tokens
       storeAuthTokens(token, refreshToken, role);
+      console.log('✅ Tokens stored in localStorage');
       
       // Fetch user data
       const userData = await fetchUserData();
+      console.log('✅ Login successful');
       
       return { success: true, user: userData };
     } catch (error) {
+      console.error('❌ Login failed:', error);
       clearAuthTokens();
       throw new Error(error.message || 'Login failed');
     }

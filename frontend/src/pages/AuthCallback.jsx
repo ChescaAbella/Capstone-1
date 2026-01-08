@@ -13,17 +13,27 @@ export const AuthCallback = () => {
   useEffect(() => {
     const handleCallback = async () => {
       try {
+        console.log('🔄 AuthCallback: Starting...');
+        console.log('🔍 Full URL:', window.location.href);
+        
         // Parse tokens from URL
         const { token, refreshToken, role } = parseAuthCallback();
+        console.log('✅ Tokens parsed successfully');
+        console.log('🔍 Token preview:', token.substring(0, 50) + '...');
+        console.log('🔍 Role:', role);
         
         // Login with tokens
+        console.log('🔄 Calling login...');
         await login(token, refreshToken, role);
+        console.log('✅ Login completed successfully');
         
         // Redirect based on role
         const dashboardPath = getDashboardPath(role);
+        console.log('🔄 Redirecting to:', dashboardPath);
         navigate(dashboardPath, { replace: true });
       } catch (err) {
-        console.error('Auth callback error:', err);
+        console.error('❌ Auth callback error:', err);
+        console.error('❌ Error stack:', err.stack);
         setError(err.message || 'Authentication failed');
         setProcessing(false);
         
