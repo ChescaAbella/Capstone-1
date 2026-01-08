@@ -34,15 +34,20 @@ const ProtectedRoute = ({ children, requiredRole }) => {
     );
   }
 
+  console.log('🔍 ProtectedRoute check:', { isAuthenticated, hasUser: !!user, requiredRole, userRole: user?.role });
+
   if (!isAuthenticated) {
+    console.log('❌ Not authenticated, redirecting to login');
     return <Navigate to="/login" replace />;
   }
 
   if (requiredRole && user?.role !== requiredRole) {
+    console.log('❌ Wrong role, redirecting to dashboard');
     // Redirect to appropriate dashboard if wrong role
     return <Navigate to="/dashboard" replace />;
   }
-
+  
+  console.log('✅ Access granted');
   return children;
 };
 

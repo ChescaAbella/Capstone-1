@@ -33,7 +33,6 @@ export const AuthProvider = ({ children }) => {
       });
 
       console.log('🔍 Response status:', response.status);
-      console.log('🔍 Response headers:', Object.fromEntries(response.headers.entries()));
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -61,6 +60,14 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const initAuth = async () => {
       console.log('🔄 Initializing auth...');
+      
+      // Don't initialize if we're on the OAuth callback page
+      if (window.location.pathname === '/auth/callback') {
+        console.log('ℹ️ Skipping initialization - on OAuth callback page');
+        setLoading(false);
+        return;
+      }
+      
       if (checkAuth()) {
         console.log('✅ Token found in localStorage, fetching user data...');
         try {
@@ -104,6 +111,7 @@ export const AuthProvider = ({ children }) => {
   // Logout
   const logout = async () => {
     try {
+      console.log('🔄 Logging out...');
       // Call backend logout endpoint
       await fetch(
         `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'}/api/auth/logout`,
@@ -122,6 +130,7 @@ export const AuthProvider = ({ children }) => {
       clearAuthTokens();
       setUser(null);
       setIsAuthenticated(false);
+      console.log('✅ Logged out');
     }
   };
 
