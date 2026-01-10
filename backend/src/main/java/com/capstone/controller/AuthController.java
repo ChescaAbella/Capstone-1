@@ -7,6 +7,7 @@ import com.capstone.model.User;
 import com.capstone.security.JwtUtil;
 import com.capstone.service.RefreshTokenService;
 import com.capstone.service.UserService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -25,6 +26,71 @@ public class AuthController {
 
     @Autowired
     private RefreshTokenService refreshTokenService;
+
+    // ===== NEW ENDPOINTS FOR EMAIL/PASSWORD AUTH =====
+    
+    @PostMapping("/signup")
+    public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signupRequest) {
+        try {
+            User user = userService.registerUser(signupRequest);
+            
+            // Generate tokens
+            String accessToken = jwtUtil.generateTokenFromEmail(user.getEmail());
+            RefreshToken refreshToken = refreshTokenService.createRefreshToken(user.getId());
+            
+            UserInfo userInfo = new UserInfo(
+                    user.getId(),
+                    user.getEmail(),
+                    user.getName(),
+                    user.getPicture(),
+                    user.getRole().name()
+            );
+            
+            return ResponseEntity.ok(new AuthResponse(
+                    accessToken,
+                    refreshToken.getToken(),
+                    user.getRole().name(),
+                    userInfo
+            ));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest()
+                    .body(new MessageResponse(e.getMessage()));
+        }
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<?> loginUser(@Valid @RequestBody LoginRequest loginRequest) {
+        try {
+            User user = userService.authenticateUser(
+                    loginRequest.getEmail(),
+                    loginRequest.getPassword()
+            );
+            
+            // Generate tokens
+            String accessToken = jwtUtil.generateTokenFromEmail(user.getEmail());
+            RefreshToken refreshToken = refreshTokenService.createRefreshToken(user.getId());
+            
+            UserInfo userInfo = new UserInfo(
+                    user.getId(),
+                    user.getEmail(),
+                    user.getName(),
+                    user.getPicture(),
+                    user.getRole().name()
+            );
+            
+            return ResponseEntity.ok(new AuthResponse(
+                    accessToken,
+                    refreshToken.getToken(),
+                    user.getRole().name(),
+                    userInfo
+            ));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(401)
+                    .body(new MessageResponse(e.getMessage()));
+        }
+    }
+
+    // ===== EXISTING ENDPOINTS =====
 
     @GetMapping("/user")
     public ResponseEntity<?> getCurrentUser(@AuthenticationPrincipal User user) {
@@ -96,7 +162,6 @@ public class AuthController {
         }
     }
 
-    // Admin endpoint to update user roles (for testing)
     @PostMapping("/update-role")
     public ResponseEntity<?> updateRole(@RequestParam String email, 
                                         @RequestParam String role) {

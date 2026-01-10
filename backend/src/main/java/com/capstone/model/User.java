@@ -24,17 +24,30 @@ public class User {
     @Column(nullable = false)
     private String name;
     
+    // Password field - nullable because OAuth users won't have passwords
+    @Column(name = "password_hash")
+    private String passwordHash;
+    
     private String picture;
     
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role = Role.STUDENT;
     
+    // Track authentication provider
+    @Enumerated(EnumType.STRING)
+    @Column(name = "auth_provider", nullable = false)
+    private AuthProvider authProvider = AuthProvider.LOCAL;
+    
     @Column(name = "created_at")
     private LocalDateTime createdAt;
     
     @Column(name = "last_login")
     private LocalDateTime lastLogin;
+    
+    // Email verification for local signups
+    @Column(name = "email_verified")
+    private boolean emailVerified = false;
     
     @PrePersist
     protected void onCreate() {
@@ -49,5 +62,10 @@ public class User {
     
     public enum Role {
         STUDENT, LEADER, ADVISER
+    }
+    
+    public enum AuthProvider {
+        LOCAL,  // Email/Password
+        GOOGLE  // Google OAuth
     }
 }
