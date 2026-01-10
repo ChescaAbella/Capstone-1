@@ -4,8 +4,10 @@ import {
   storeAuthTokens, 
   clearAuthTokens, 
   isAuthenticated as checkAuth,
-  getAuthHeader 
-} from '../services/googleOAuth';
+  getAuthHeader,
+  signupWithEmail,
+  loginWithEmail
+} from '../services/authService';
 
 const AuthContext = createContext();
 
@@ -48,7 +50,6 @@ export const AuthProvider = ({ children }) => {
       return userData;
     } catch (error) {
       console.error('❌ Failed to fetch user data:', error);
-      // Clear invalid tokens
       clearAuthTokens();
       setUser(null);
       setIsAuthenticated(false);
@@ -85,9 +86,9 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   // Login with tokens from OAuth callback
-  const login = async (token, refreshToken, role) => {
+  const loginWithOAuth = async (token, refreshToken, role) => {
     try {
-      console.log('🔄 Login started');
+      console.log('🔄 OAuth login started');
       console.log('🔍 Token length:', token?.length);
       console.log('🔍 RefreshToken:', refreshToken?.substring(0, 20) + '...');
       console.log('🔍 Role:', role);
@@ -98,13 +99,49 @@ export const AuthProvider = ({ children }) => {
       
       // Fetch user data
       const userData = await fetchUserData();
-      console.log('✅ Login successful');
+      console.log('✅ OAuth login successful');
       
       return { success: true, user: userData };
     } catch (error) {
-      console.error('❌ Login failed:', error);
+      console.error('❌ OAuth login failed:', error);
       clearAuthTokens();
       throw new Error(error.message || 'Login failed');
+    }
+  };
+
+  // Signup with email/password
+  const signup = async (signupData) => {
+    try {
+      console.log('🔄 Signup started');
+      const data = await signupWithEmail(signupData);
+      console.log('✅ Signup successful, fetching user data...');
+      
+      // Fetch user data after signup
+      const userData = await fetchUserData();
+      
+      return { success: true, user: userData };
+    } catch (error) {
+      console.error('❌ Signup failed:', error);
+      clearAuthTokens();
+      throw error;
+    }
+  };
+
+  // Login with email/password
+  const login = async (loginData) => {
+    try {
+      console.log('🔄 Email login started');
+      const data = await loginWithEmail(loginData);
+      console.log('✅ Email login successful, fetching user data...');
+      
+      // Fetch user data after login
+      const userData = await fetchUserData();
+      
+      return { success: true, user: userData };
+    } catch (error) {
+      console.error('❌ Email login failed:', error);
+      clearAuthTokens();
+      throw error;
     }
   };
 
@@ -112,7 +149,6 @@ export const AuthProvider = ({ children }) => {
   const logout = async () => {
     try {
       console.log('🔄 Logging out...');
-      // Call backend logout endpoint
       await fetch(
         `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'}/api/auth/logout`,
         {
@@ -126,7 +162,6 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       console.error('Logout API call failed:', error);
     } finally {
-      // Clear tokens regardless of API call success
       clearAuthTokens();
       setUser(null);
       setIsAuthenticated(false);
@@ -149,7 +184,9 @@ export const AuthProvider = ({ children }) => {
         user, 
         isAuthenticated, 
         loading, 
-        login, 
+        login,           // Email/password login
+        signup,          // Email/password signup
+        loginWithOAuth,  // OAuth login (for callback)
         logout, 
         refreshUser,
         getAuthHeader 

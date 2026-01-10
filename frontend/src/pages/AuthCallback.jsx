@@ -1,12 +1,13 @@
 import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { parseAuthCallback } from '../services/googleOAuth';
+import { parseAuthCallback } from '../services/authService';
 import { Alert } from '../components/Alert';
 
 export const AuthCallback = () => {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  // const { login } = useAuth();
+  const { loginWithOAuth } = useAuth();
   const [error, setError] = useState('');
   const [processing, setProcessing] = useState(true);
   const hasRun = useRef(false); // Prevent double execution
@@ -29,7 +30,8 @@ export const AuthCallback = () => {
         
         // Login with tokens
         console.log('🔄 Calling login...');
-        await login(token, refreshToken, role);
+        // await login(token, refreshToken, role);
+        await loginWithOAuth(token, refreshToken, role);
         console.log('✅ Login completed successfully');
         
         // Redirect based on role
