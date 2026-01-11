@@ -152,7 +152,7 @@ export const LoginPage = () => {
             {/* Sign up link */}
             <p className="auth-link">
               Don't have an account?{' '}
-              <Link to="/signup">Sign up here</Link>
+              <Link to="/register">Sign up here</Link>
             </p>
           </div>
         </div>

@@ -8,7 +8,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Lazy;  // ✅ ADD THIS IMPORT
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
@@ -24,7 +24,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
     private JwtUtil jwtUtil;
 
     @Autowired
-    @Lazy  // ✅ ADD THIS ANNOTATION
+    @Lazy
     private UserService userService;
 
     @Autowired
@@ -33,8 +33,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
     @Value("${app.frontend-url}")
     private String frontendUrl;
 
-    @Value("${app.allowed-email-domain}")
-    private String allowedDomain;
+    // No need for allowedDomain check in OAuth - we accept any Google account
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, 
@@ -48,15 +47,9 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
             String name = oAuth2User.getAttribute("name");
             String picture = oAuth2User.getAttribute("picture");
 
-            // Validate email domain
-            if (email == null || !email.endsWith(allowedDomain)) {
-                String errorUrl = UriComponentsBuilder.fromUriString(frontendUrl + "/login")
-                        .queryParam("error", "unauthorized_domain")
-                        .queryParam("message", "Only " + allowedDomain + " emails are allowed")
-                        .build().toUriString();
-                getRedirectStrategy().sendRedirect(request, response, errorUrl);
-                return;
-            }
+            // NO EMAIL DOMAIN VALIDATION FOR GOOGLE OAUTH
+            // We accept any Google account for OAuth sign-in
+            // Email/password signup will still enforce @cit.edu in UserService.java
 
             // Create or update user
             User user = userService.createOrUpdateUser(email, name, picture);

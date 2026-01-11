@@ -47,6 +47,7 @@ export const initiateGoogleLogin = () => {
  */
 export const signupWithEmail = async (signupData) => {
   try {
+    console.log('📤 Sending signup request...');
     const response = await fetch(`${API_URL}/api/auth/signup`, {
       method: 'POST',
       headers: {
@@ -55,19 +56,23 @@ export const signupWithEmail = async (signupData) => {
       body: JSON.stringify(signupData),
     });
 
+    console.log('📥 Signup response status:', response.status);
+
     if (!response.ok) {
       const errorData = await response.json();
       throw new Error(errorData.message || 'Signup failed');
     }
 
     const data = await response.json();
+    console.log('✅ Signup successful, data received');
     
-    // Store tokens
+    // Store tokens immediately
     storeAuthTokens(data.accessToken, data.refreshToken, data.role);
+    console.log('💾 Tokens stored in localStorage');
     
     return data;
   } catch (error) {
-    console.error('Signup error:', error);
+    console.error('❌ Signup error:', error);
     throw error;
   }
 };
@@ -79,6 +84,7 @@ export const signupWithEmail = async (signupData) => {
  */
 export const loginWithEmail = async (loginData) => {
   try {
+    console.log('📤 Sending login request...');
     const response = await fetch(`${API_URL}/api/auth/login`, {
       method: 'POST',
       headers: {
@@ -87,19 +93,23 @@ export const loginWithEmail = async (loginData) => {
       body: JSON.stringify(loginData),
     });
 
+    console.log('📥 Login response status:', response.status);
+
     if (!response.ok) {
       const errorData = await response.json();
       throw new Error(errorData.message || 'Login failed');
     }
 
     const data = await response.json();
+    console.log('✅ Login successful, data received');
     
-    // Store tokens
+    // Store tokens immediately
     storeAuthTokens(data.accessToken, data.refreshToken, data.role);
+    console.log('💾 Tokens stored in localStorage');
     
     return data;
   } catch (error) {
-    console.error('Login error:', error);
+    console.error('❌ Login error:', error);
     throw error;
   }
 };

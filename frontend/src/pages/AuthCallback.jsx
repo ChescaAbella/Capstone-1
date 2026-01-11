@@ -6,14 +6,12 @@ import { Alert } from '../components/Alert';
 
 export const AuthCallback = () => {
   const navigate = useNavigate();
-  // const { login } = useAuth();
   const { loginWithOAuth } = useAuth();
   const [error, setError] = useState('');
   const [processing, setProcessing] = useState(true);
-  const hasRun = useRef(false); // Prevent double execution
+  const hasRun = useRef(false);
 
   useEffect(() => {
-    // Prevent running twice in React Strict Mode
     if (hasRun.current) return;
     hasRun.current = true;
 
@@ -21,16 +19,44 @@ export const AuthCallback = () => {
       try {
         console.log('🔄 AuthCallback: Starting...');
         console.log('🔍 Full URL:', window.location.href);
+        console.log('🔍 Search params:', window.location.search);
         
         // Parse tokens from URL
-        const { token, refreshToken, role } = parseAuthCallback();
+        const { token, refreshToken, role, error: urlError, message } = parseAuthCallback();
+        
+        console.log('🔍 Parsed data:', { 
+          hasToken: !!token, 
+          tokenPreview: token?.substring(0, 20),
+          hasRefreshToken: !!refreshToken,
+          role,
+          error: urlError,
+          message 
+        });
+
+        // Check for errors in URL
+        if (urlError) {
+          console.error('❌ OAuth error from URL:', urlError, message);
+          setError(message || urlError);
+          setProcessing(false);
+          setTimeout(() => navigate('/login', { replace: true }), 3000);
+          return;
+        }
+
+        // Check if tokens are present
+        if (!token || !refreshToken) {
+          console.error('❌ Missing tokens!', { hasToken: !!token, hasRefreshToken: !!refreshToken });
+          setError('Authentication failed - missing credentials');
+          setProcessing(false);
+          setTimeout(() => navigate('/login', { replace: true }), 3000);
+          return;
+        }
+
         console.log('✅ Tokens parsed successfully');
         console.log('🔍 Token preview:', token.substring(0, 50) + '...');
         console.log('🔍 Role:', role);
         
         // Login with tokens
-        console.log('🔄 Calling login...');
-        // await login(token, refreshToken, role);
+        console.log('🔄 Calling loginWithOAuth...');
         await loginWithOAuth(token, refreshToken, role);
         console.log('✅ Login completed successfully');
         
@@ -44,7 +70,6 @@ export const AuthCallback = () => {
         setError(err.message || 'Authentication failed');
         setProcessing(false);
         
-        // Redirect to login after 3 seconds
         setTimeout(() => {
           navigate('/login', { replace: true });
         }, 3000);
@@ -52,7 +77,7 @@ export const AuthCallback = () => {
     };
 
     handleCallback();
-  }, []); // Empty dependency array - only run once
+  }, []);
 
   const getDashboardPath = (role) => {
     const roleMap = {
