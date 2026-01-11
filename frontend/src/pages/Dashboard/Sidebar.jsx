@@ -1,11 +1,12 @@
 import { useAuth } from '../../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '../../components/Button';
 import './Sidebar.css';
 
 const Sidebar = ({ role }) => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleLogout = () => {
     logout();
@@ -16,26 +17,32 @@ const Sidebar = ({ role }) => {
     navigate('/profile');
   };
 
+  const handleNavigation = (path) => {
+    if (location.pathname !== path) {
+      navigate(path);
+    }
+  };
+
   // Navigation items based on role
   const navItems = {
     MEMBER: [
-      { icon: '📊', label: 'Dashboard', path: '/dashboard', action: () => navigate('/dashboard') },
-      { icon: '�', label: 'Deliverables', path: '/member/deliverables', action: () => navigate('/member/deliverables') },
-      { icon: '📜', label: 'History', path: '/member/history', action: () => navigate('/member/history') },
+      { icon: '📊', label: 'Dashboard', path: '/dashboard', action: () => handleNavigation('/dashboard') },
+      { icon: '📝', label: 'Deliverables', path: '/member/deliverables', action: () => handleNavigation('/member/deliverables') },
+      { icon: '📜', label: 'History', path: '/member/history', action: () => handleNavigation('/member/history') },
     ],
     MANAGER: [
-      { icon: '📊', label: 'Dashboard', path: '/dashboard', action: () => navigate('/dashboard') },
-      { icon: '📋', label: 'Deliverables', path: '/deliverables', action: () => navigate('/deliverables') },
-      { icon: '👥', label: 'Team Members', path: '/team', action: () => navigate('/team') },
-      { icon: '📈', label: 'Analytics', path: '/analytics', action: () => navigate('/analytics') },
-      { icon: '⚙️', label: 'Settings', path: '/settings', action: () => navigate('/settings') },
+      { icon: '📊', label: 'Dashboard', path: '/dashboard', action: () => handleNavigation('/dashboard') },
+      { icon: '📋', label: 'Deliverables', path: '/manager/deliverables', action: () => handleNavigation('/manager/deliverables') },
+      { icon: '👥', label: 'Team Members', path: '/manager/team-members', action: () => handleNavigation('/manager/team-members') },
+      { icon: '📈', label: 'Analytics', path: '/analytics', action: () => handleNavigation('/analytics') },
+      { icon: '⚙️', label: 'Settings', path: '/settings', action: () => handleNavigation('/settings') },
     ],
     ADMIN: [
-      { icon: '📊', label: 'Dashboard', path: '/dashboard', action: () => navigate('/dashboard') },
-      { icon: '👥', label: 'Users', path: '/users', action: () => navigate('/users') },
-      { icon: '📈', label: 'Analytics', path: '/analytics', action: () => navigate('/analytics') },
-      { icon: '⚙️', label: 'Settings', path: '/settings', action: () => navigate('/settings') },
-      { icon: '🔒', label: 'Security', path: '/security', action: () => navigate('/security') },
+      { icon: '📊', label: 'Dashboard', path: '/dashboard', action: () => handleNavigation('/dashboard') },
+      { icon: '👥', label: 'Users', path: '/users', action: () => handleNavigation('/users') },
+      { icon: '📈', label: 'Analytics', path: '/analytics', action: () => handleNavigation('/analytics') },
+      { icon: '⚙️', label: 'Settings', path: '/settings', action: () => handleNavigation('/settings') },
+      { icon: '🔒', label: 'Security', path: '/security', action: () => handleNavigation('/security') },
     ],
   };
 

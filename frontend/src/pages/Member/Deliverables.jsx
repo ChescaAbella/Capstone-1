@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '../Dashboard/DashboardLayout';
 import { useAuth } from '../../context/AuthContext';
+import { Modal } from '../../components/Modal';
+import { Button } from '../../components/Button';
 import './Deliverables.css';
 
 const MemberDeliverablesPage = () => {
@@ -11,6 +13,9 @@ const MemberDeliverablesPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [statusFilter, setStatusFilter] = useState('pending');
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [selectedDeliverable, setSelectedDeliverable] = useState(null);
   const itemsPerPage = 6;
 
   useEffect(() => {
@@ -62,6 +67,14 @@ const MemberDeliverablesPage = () => {
           status: 'pending',
           daysRemaining: 73,
         },
+        {
+          id: 6,
+          title: 'Assignment 6: Completed Task',
+          description: 'This assignment has been completed',
+          deadline: '2024-12-20',
+          status: 'completed',
+          daysRemaining: -22,
+        },
       ];
       setDeliverables(mockDeliverables);
     } catch (err) {
@@ -72,8 +85,15 @@ const MemberDeliverablesPage = () => {
     }
   };
 
-  const handleCardClick = (deliverable) => {
-    navigate(`/member/deliverables/${deliverable.id}`, { state: { deliverable } });
+  const handleCardClick = (deliverable, e) => {
+    e.stopPropagation();
+    setSelectedDeliverable(deliverable);
+    setShowDetailsModal(true);
+  };
+
+  const handleEdit = () => {
+    navigate(`/member/deliverables/${selectedDeliverable.id}`, { state: { deliverable: selectedDeliverable } });
+    setShowDetailsModal(false);
   };
 
   const getStatusColor = (status) => {
@@ -93,17 +113,27 @@ const MemberDeliverablesPage = () => {
     return status.charAt(0).toUpperCase() + status.slice(1);
   };
 
+  // Filter deliverables based on status (exclude completed by default)
+  const filteredDeliverables = deliverables.filter(d => d.status !== 'completed').filter(d => 
+    statusFilter === 'pending' || statusFilter === 'overdue' ? d.status === statusFilter : true
+  );
+
   // Pagination logic
-  const totalPages = Math.ceil(deliverables.length / itemsPerPage);
+  const totalPages = Math.ceil(filteredDeliverables.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const currentDeliverables = deliverables.slice(startIndex, endIndex);
+  const currentDeliverables = filteredDeliverables.slice(startIndex, endIndex);
 
   const handlePageChange = (newPage) => {
     if (newPage >= 1 && newPage <= totalPages) {
       setCurrentPage(newPage);
       window.scrollTo(0, 0);
     }
+  };
+
+  const handleStatusFilterChange = (newStatus) => {
+    setStatusFilter(newStatus);
+    setCurrentPage(1);
   };
 
   if (loading) {
@@ -138,12 +168,52 @@ const MemberDeliverablesPage = () => {
           </div>
         ) : (
           <>
+            <div className="filter-section" style={{ marginBottom: '20px' }}>
+              <label style={{ fontWeight: 600, marginRight: '12px' }}>Filter by Status:</label>
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                {['pending', 'overdue'].map(status => (
+                  <button
+                    key={status}
+                    onClick={() => handleStatusFilterChange(status)}
+                    style={{
+                      padding: '6px 12px',
+                      borderRadius: '4px',
+                      border: statusFilter === status ? '2px solid #0066cc' : '1px solid #e0e0e0',
+                      backgroundColor: statusFilter === status ? '#e6f2ff' : '#ffffff',
+                      color: statusFilter === status ? '#0066cc' : '#333',
+                      cursor: 'pointer',
+                      fontWeight: statusFilter === status ? 600 : 400,
+                      fontSize: '0.9rem',
+                    }}
+                  >
+                    {status.charAt(0).toUpperCase() + status.slice(1)}
+                  </button>
+                ))}
+              </div>
+              <button
+                onClick={() => navigate('/member/history')}
+                style={{
+                  padding: '6px 12px',
+                  marginLeft: '16px',
+                  borderRadius: '4px',
+                  border: '1px solid #e0e0e0',
+                  backgroundColor: '#f9f9f9',
+                  color: '#333',
+                  cursor: 'pointer',
+                  fontWeight: 400,
+                  fontSize: '0.9rem',
+                }}
+              >
+                📜 View History
+              </button>
+            </div>
+
             <div className="deliverables-grid">
               {currentDeliverables.map((deliverable) => (
                 <div
                   key={deliverable.id}
                   className="deliverable-card"
-                  onClick={() => handleCardClick(deliverable)}
+                  onClick={(e) => handleCardClick(deliverable, e)}
                 >
                   <div className="card-header">
                     <h3>{deliverable.title}</h3>
@@ -204,6 +274,75 @@ const MemberDeliverablesPage = () => {
           </>
         )}
       </div>
+
+      {/* Details Modal */}
+      {selectedDeliverable && (
+        <Modal
+          isOpen={showDetailsModal}
+          onClose={() => setShowDetailsModal(false)}
+          title="Deliverable Details"
+        >
+          <div style={{ padding: '10px 0' }}>
+            <div style={{ marginBottom: '15px' }}>
+              <strong>Title:</strong>
+              <p style={{ margin: '5px 0 0 0', color: '#666' }}>{selectedDeliverable.title}</p>
+            </div>
+
+            <div style={{ marginBottom: '15px' }}>
+              <strong>Description:</strong>
+              <p style={{ margin: '5px 0 0 0', color: '#666' }}>{selectedDeliverable.description}</p>
+            </div>
+
+            <div style={{ marginBottom: '15px' }}>
+              <strong>Deadline:</strong>
+              <p style={{ margin: '5px 0 0 0', color: '#666' }}>{selectedDeliverable.deadline}</p>
+            </div>
+
+            <div style={{ marginBottom: '15px' }}>
+              <strong>Status:</strong>
+              <p style={{ margin: '5px 0 0 0' }}>
+                <span
+                  style={{
+                    display: 'inline-block',
+                    padding: '4px 8px',
+                    borderRadius: '4px',
+                    color: 'white',
+                    backgroundColor: getStatusColor(selectedDeliverable.status),
+                    fontSize: '0.85rem',
+                    fontWeight: 600,
+                  }}
+                >
+                  {getStatusLabel(selectedDeliverable.status)}
+                </span>
+              </p>
+            </div>
+
+            <div style={{ marginBottom: '15px' }}>
+              <strong>Time Remaining:</strong>
+              <p style={{ margin: '5px 0 0 0', color: '#666' }}>
+                {selectedDeliverable.daysRemaining > 0
+                  ? `${selectedDeliverable.daysRemaining} days left`
+                  : `${Math.abs(selectedDeliverable.daysRemaining)} days overdue`}
+              </p>
+            </div>
+
+            <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', marginTop: '20px' }}>
+              <Button
+                variant="secondary"
+                onClick={() => setShowDetailsModal(false)}
+              >
+                Close
+              </Button>
+              <Button
+                variant="primary"
+                onClick={handleEdit}
+              >
+                ✏️ Edit & Submit
+              </Button>
+            </div>
+          </div>
+        </Modal>
+      )}
     </DashboardLayout>
   );
 };

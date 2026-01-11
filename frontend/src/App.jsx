@@ -12,6 +12,8 @@ import AdminDashboard from './pages/Dashboard/AdminDashboard';
 import MemberDeliverablesPage from './pages/Member/Deliverables';
 import DeliverableSubmitPage from './pages/Member/DeliverableSubmit';
 import HistoryPage from './pages/Member/History';
+import ManagerDeliverablesPage from './pages/Manager/Deliverables';
+import ManagerTeamMembersPage from './pages/Manager/TeamMembers';
 import MockUserPanel from './components/MockUserPanel';
 import './styles/global.css';
 
@@ -86,9 +88,24 @@ function AppContent() {
 
       <Route
         path="/member/history"
+        element={<HistoryPage />}
+      />
+
+      {/* Manager Routes */}
+      <Route
+        path="/manager/deliverables"
         element={
-          <ProtectedRoute requiredRole="MEMBER">
-            <HistoryPage />
+          <ProtectedRoute requiredRole="MANAGER">
+            <ManagerDeliverablesPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/manager/team-members"
+        element={
+          <ProtectedRoute requiredRole="MANAGER">
+            <ManagerTeamMembersPage />
           </ProtectedRoute>
         }
       />
