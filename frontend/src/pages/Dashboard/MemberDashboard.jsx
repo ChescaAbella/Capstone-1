@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import DashboardLayout from './DashboardLayout';
 import { Card, CardBody } from '../../components/Card';
 import { Button } from '../../components/Button';
@@ -11,6 +12,7 @@ import './Dashboard.css';
 
 const MemberDashboard = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [showAssistant, setShowAssistant] = useState(false);
   const [assistantMessage, setAssistantMessage] = useState('');
 
@@ -146,16 +148,16 @@ const MemberDashboard = () => {
         <Card className="ai-assistant-card">
           <CardBody>
             <div className="ai-header">
-              <h3>🤖 AI Deadline Assistant</h3>
+              <h3>📦 My Deliverables</h3>
               <Button
                 variant="primary"
                 size="sm"
-                onClick={() => setShowAssistant(true)}
+                onClick={() => navigate('/member/deliverables')}
               >
-                Chat with AI
+                View All Deliverables
               </Button>
             </div>
-            <p>Get AI-powered insights about your deadlines and submission status</p>
+            <p>View, track, and submit your assigned deliverables</p>
           </CardBody>
         </Card>
 

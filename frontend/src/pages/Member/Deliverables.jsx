@@ -2,6 +2,13 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '../Dashboard/DashboardLayout';
 import { useAuth } from '../../context/AuthContext';
+import { 
+  getDeliverablesByTeam,
+  calculateDaysRemaining,
+  getDeliverableStatus,
+  formatDeadline
+} from '../../services/deliverableService';
+import { getActiveTeams } from '../../services/teamService';
 import './Deliverables.css';
 
 const MemberDeliverablesPage = () => {
@@ -20,52 +27,34 @@ const MemberDeliverablesPage = () => {
   const fetchDeliverables = async () => {
     try {
       setLoading(true);
-      // Mock data for assignments/deliverables
-      const mockDeliverables = [
-        {
-          id: 1,
-          title: 'Assignment 1: Project Proposal',
-          description: 'Submit your project proposal with objectives and timeline',
-          deadline: '2025-01-15',
-          status: 'pending',
-          daysRemaining: 28,
-        },
-        {
-          id: 2,
-          title: 'Assignment 2: Research Document',
-          description: 'Complete research document with citations and analysis',
-          deadline: '2025-01-22',
-          status: 'pending',
-          daysRemaining: 35,
-        },
-        {
-          id: 3,
-          title: 'Assignment 3: Mid-term Presentation',
-          description: 'Prepare and submit presentation slides for review',
-          deadline: '2025-02-05',
-          status: 'pending',
-          daysRemaining: 49,
-        },
-        {
-          id: 4,
-          title: 'Assignment 4: Code Implementation',
-          description: 'Submit source code and documentation',
-          deadline: '2024-12-25',
-          status: 'overdue',
-          daysRemaining: -24,
-        },
-        {
-          id: 5,
-          title: 'Assignment 5: Final Report',
-          description: 'Comprehensive final report with conclusions',
-          deadline: '2025-03-01',
-          status: 'pending',
-          daysRemaining: 73,
-        },
-      ];
-      setDeliverables(mockDeliverables);
+      setError('');
+      
+      // Get user's teams and fetch deliverables
+      const teams = await getActiveTeams();
+      
+      if (teams.length === 0) {
+        setDeliverables([]);
+        return;
+      }
+      
+      // Fetch deliverables for all user's teams
+      const allDeliverables = await Promise.all(
+        teams.map(team => getDeliverablesByTeam(team.id))
+      );
+      
+      // Flatten and process deliverables
+      const processedDeliverables = allDeliverables
+        .flat()
+        .map(deliv => ({
+          ...deliv,
+          daysRemaining: calculateDaysRemaining(deliv.deadline),
+          status: getDeliverableStatus(deliv.progress, deliv.deadline)
+        }))
+        .sort((a, b) => new Date(a.deadline) - new Date(b.deadline));
+      
+      setDeliverables(processedDeliverables);
     } catch (err) {
-      setError('Failed to load deliverables');
+      setError('Failed to load deliverables: ' + err.message);
       console.error(err);
     } finally {
       setLoading(false);
@@ -77,20 +66,23 @@ const MemberDeliverablesPage = () => {
   };
 
   const getStatusColor = (status) => {
-    switch (status) {
-      case 'completed':
-        return '#28a745';
-      case 'pending':
-        return '#ffc107';
-      case 'overdue':
-        return '#dc3545';
-      default:
-        return '#6c757d';
-    }
+    const colors = {
+      'completed': '#28a745',
+      'in-progress': '#007bff',
+      'at-risk': '#ffc107',
+      'overdue': '#dc3545'
+    };
+    return colors[status] || '#6c757d';
   };
 
   const getStatusLabel = (status) => {
-    return status.charAt(0).toUpperCase() + status.slice(1);
+    const labels = {
+      'completed': 'Completed',
+      'in-progress': 'In Progress',
+      'at-risk': 'At Risk',
+      'overdue': 'Overdue'
+    };
+    return labels[status] || status.charAt(0).toUpperCase() + status.slice(1);
   };
 
   // Pagination logic
@@ -160,7 +152,7 @@ const MemberDeliverablesPage = () => {
                   <div className="card-footer">
                     <div className="deadline-info">
                       <span className="deadline-label">Deadline:</span>
-                      <span className="deadline-date">{deliverable.deadline}</span>
+                      <span className="deadline-date">{formatDeadline(deliverable.deadline)}</span>
                     </div>
                     <div className={`days-remaining ${deliverable.status}`}>
                       {deliverable.daysRemaining > 0

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import DashboardLayout from './DashboardLayout';
 import { Card, CardBody } from '../../components/Card';
 import { Button } from '../../components/Button';
@@ -11,6 +12,7 @@ import './Dashboard.css';
 
 const ManagerDashboard = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [showCreateAssignment, setShowCreateAssignment] = useState(false);
   const [assignments, setAssignments] = useState([
     {
@@ -108,6 +110,12 @@ const ManagerDashboard = () => {
         <div className="action-bar">
           <Button
             variant="primary"
+            onClick={() => navigate('/manager/deliverables')}
+          >
+            📦 Manage Deliverables
+          </Button>
+          <Button
+            variant="secondary"
             onClick={() => setShowCreateAssignment(true)}
           >
             + Create New Assignment
