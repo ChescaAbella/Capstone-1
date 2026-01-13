@@ -26,7 +26,7 @@ export const Table = ({ columns = [], data = [], className = '' }) => {
                 {columns.map((column) => (
                   <td key={`${rowIndex}-${column.key}`}>
                     {column.render
-                      ? column.render(row[column.key], row)
+                      ? column.render(row)
                       : row[column.key]}
                   </td>
                 ))}

@@ -15,6 +15,19 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [token, setToken] = useState(null);
+
+  // Dev-only helper for MockUserPanel so it doesn't crash when toggled
+  const setMockUser = (role) => {
+    const normalizedRole = role?.toUpperCase();
+    setUser((prev) => {
+      if (prev) {
+        return { ...prev, role: normalizedRole };
+      }
+      return { name: 'Mock User', email: 'mock@example.com', role: normalizedRole };
+    });
+    setIsAuthenticated(true);
+  };
 
   // Fetch user data from backend
   const fetchUserData = async () => {
@@ -47,6 +60,12 @@ export const AuthProvider = ({ children }) => {
       
       setUser(userData);
       setIsAuthenticated(true);
+      
+      // Check if email is verified for email/password users
+      if (userData.emailVerified === false) {
+        console.log('⚠️ Email not verified, user needs to verify');
+      }
+      
       return userData;
     } catch (error) {
       console.error('❌ Failed to fetch user data:', error);
@@ -71,6 +90,9 @@ export const AuthProvider = ({ children }) => {
       
       if (checkAuth()) {
         console.log('✅ Token found in localStorage, fetching user data...');
+        // Set token from localStorage
+        const tokens = getAuthTokens();
+        setToken(tokens?.accessToken || null);
         try {
           await fetchUserData();
         } catch (error) {
@@ -86,15 +108,16 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   // Login with tokens from OAuth callback
-  const loginWithOAuth = async (token, refreshToken, role) => {
+  const loginWithOAuth = async (accessToken, refreshToken, role) => {
     try {
       console.log('🔄 OAuth login started');
-      console.log('🔍 Token length:', token?.length);
+      console.log('🔍 Token length:', accessToken?.length);
       console.log('🔍 RefreshToken:', refreshToken?.substring(0, 20) + '...');
       console.log('🔍 Role:', role);
       
       // Store tokens
-      storeAuthTokens(token, refreshToken, role);
+      storeAuthTokens(accessToken, refreshToken, role);
+      setToken(accessToken);
       console.log('✅ Tokens stored in localStorage');
       
       // Fetch user data
@@ -119,7 +142,7 @@ export const AuthProvider = ({ children }) => {
       // Fetch user data after signup
       const userData = await fetchUserData();
       
-      return { success: true, user: userData };
+      return { success: true, user: userData, needsVerification: true };
     } catch (error) {
       console.error('❌ Signup failed:', error);
       clearAuthTokens();
@@ -134,10 +157,14 @@ export const AuthProvider = ({ children }) => {
       const data = await loginWithEmail(loginData);
       console.log('✅ Email login successful, fetching user data...');
       
+      // Set token
+      const tokens = getAuthTokens();
+      setToken(tokens?.accessToken || null);
+      
       // Fetch user data after login
       const userData = await fetchUserData();
       
-      return { success: true, user: userData };
+      return { success: true, user: userData, needsVerification: userData.emailVerified === false };
     } catch (error) {
       console.error('❌ Email login failed:', error);
       clearAuthTokens();
@@ -165,6 +192,7 @@ export const AuthProvider = ({ children }) => {
       clearAuthTokens();
       setUser(null);
       setIsAuthenticated(false);
+      setToken(null);
       console.log('✅ Logged out');
     }
   };
@@ -183,13 +211,15 @@ export const AuthProvider = ({ children }) => {
       value={{ 
         user, 
         isAuthenticated, 
-        loading, 
+        loading,
+        token,
         login,           // Email/password login
         signup,          // Email/password signup
         loginWithOAuth,  // OAuth login (for callback)
         logout, 
         refreshUser,
-        getAuthHeader 
+        getAuthHeader,
+        setMockUser,     // Dev helper for MockUserPanel
       }}
     >
       {children}

@@ -79,9 +79,9 @@ const MemberDashboard = () => {
       key: 'status',
       label: 'Status',
       width: '15%',
-      render: (status) => (
-        <Badge variant={status === 'completed' ? 'success' : status === 'submitted' ? 'info' : status === 'in-progress' ? 'warning' : 'default'}>
-          {status}
+      render: (row) => (
+        <Badge variant={row.status === 'completed' ? 'success' : row.status === 'submitted' ? 'info' : row.status === 'in-progress' ? 'warning' : 'default'}>
+          {row.status}
         </Badge>
       ),
     },
@@ -89,7 +89,7 @@ const MemberDashboard = () => {
       key: 'grade',
       label: 'Feedback',
       width: '15%',
-      render: (grade) => grade ? <span className="grade-badge">{grade}</span> : <span>—</span>,
+      render: (row) => row.grade ? <span className="grade-badge">{row.grade}</span> : <span>—</span>,
     },
   ];
 
@@ -100,9 +100,9 @@ const MemberDashboard = () => {
       key: 'priority',
       label: 'Priority',
       width: '30%',
-      render: (priority) => (
-        <Badge variant={priority === 'critical' ? 'danger' : priority === 'high' ? 'warning' : 'info'}>
-          {priority}
+      render: (row) => (
+        <Badge variant={row.priority === 'critical' ? 'danger' : row.priority === 'high' ? 'warning' : 'info'}>
+          {row.priority}
         </Badge>
       ),
     },

@@ -48,6 +48,13 @@ export const LoginPage = () => {
       console.log('✅ Login result:', result);
       
       if (result.success && result.user) {
+        // Check if email verification is required
+        if (result.needsVerification) {
+          console.log('⚠️ Email not verified, redirecting to verification page');
+          navigate('/verification-pending', { replace: true });
+          return;
+        }
+        
         console.log('👤 User role:', result.user.role);
         
         // Redirect based on role - Match your App.jsx routes

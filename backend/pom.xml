@@ -16,11 +16,24 @@
     <artifactId>capstone-backend</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>Capstone Backend</name>
-    <description>Capstone Project Backend - Module 1</description>
+    <description>Capstone Project Backend - Module 1 &amp; 2</description>
     
     <properties>
         <java.version>21</java.version>
+        <google-cloud-java.version>1.6.0</google-cloud-java.version>
     </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.google.cloud</groupId>
+                <artifactId>libraries-bom</artifactId>
+                <version>26.23.0</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
     
     <dependencies>
         <!-- Spring Boot Starter Web -->
@@ -80,6 +93,18 @@
             <optional>true</optional>
         </dependency>
 
+        <!-- Google Sheets API -->
+        <dependency>
+            <groupId>com.google.apis</groupId>
+            <artifactId>google-api-services-sheets</artifactId>
+            <version>v4-rev612-1.25.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.http-client</groupId>
+            <artifactId>google-http-client-jackson2</artifactId>
+            <version>1.42.2</version>
+        </dependency>
+
         <!-- Spring Boot Starter Test -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -93,18 +118,19 @@
             <artifactId>spring-security-test</artifactId>
             <scope>test</scope>
         </dependency>
-                <!-- .env -->
+
+        <!-- .env -->
         <dependency>
             <groupId>me.paulschwarz</groupId>
             <artifactId>spring-dotenv</artifactId>
             <version>4.0.0</version>
         </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
     </dependencies>
-
 
     <build>
         <plugins>

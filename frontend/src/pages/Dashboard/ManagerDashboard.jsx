@@ -54,9 +54,9 @@ const ManagerDashboard = () => {
       key: 'status',
       label: 'Status',
       width: '15%',
-      render: (status) => (
-        <Badge variant={status === 'active' ? 'success' : 'info'}>
-          {status}
+      render: (row) => (
+        <Badge variant={row.status === 'active' ? 'success' : 'info'}>
+          {row.status}
         </Badge>
       ),
     },

@@ -25,5 +25,5 @@ public class SignupRequest {
     private String password;
     
     @NotBlank(message = "Role is required")
-    private String role; // STUDENT, LEADER, or ADVISER
+    private String role; // MEMBER, MANAGER, or ADMIN
 }

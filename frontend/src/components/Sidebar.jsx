@@ -19,25 +19,17 @@ const Sidebar = ({ role }) => {
   // Navigation items based on role
   const navItems = {
     MEMBER: [
-      { icon: '📊', label: 'Dashboard', path: '/dashboard', action: () => navigate('/dashboard') },
-      { icon: '📤', label: 'Submissions', path: '/submissions', action: () => navigate('/submissions') },
-      { icon: '📋', label: 'Deliverables', path: '/deliverables', action: () => navigate('/deliverables') },
-      { icon: '⏰', label: 'Deadlines', path: '/deadlines', action: () => navigate('/deadlines') },
-      { icon: '📈', label: 'Progress', path: '/progress', action: () => navigate('/progress') },
+      { icon: '📊', label: 'Dashboard', path: '/dashboard/member', action: () => navigate('/dashboard/member') },
+      { icon: '📋', label: 'Deliverables', path: '/member/deliverables', action: () => navigate('/member/deliverables') },
+      { icon: '🕓', label: 'History', path: '/member/history', action: () => navigate('/member/history') },
     ],
     MANAGER: [
-      { icon: '📊', label: 'Dashboard', path: '/dashboard', action: () => navigate('/dashboard') },
-      { icon: '📋', label: 'Deliverables', path: '/deliverables', action: () => navigate('/deliverables') },
-      { icon: '👥', label: 'Team Members', path: '/team', action: () => navigate('/team') },
-      { icon: '📈', label: 'Analytics', path: '/analytics', action: () => navigate('/analytics') },
-      { icon: '⚙️', label: 'Settings', path: '/settings', action: () => navigate('/settings') },
+      { icon: '📊', label: 'Dashboard', path: '/dashboard/manager', action: () => navigate('/dashboard/manager') },
+      { icon: '👤', label: 'Profile', path: '/profile', action: () => navigate('/profile') },
     ],
     ADMIN: [
-      { icon: '📊', label: 'Dashboard', path: '/dashboard', action: () => navigate('/dashboard') },
-      { icon: '👥', label: 'Users', path: '/users', action: () => navigate('/users') },
-      { icon: '📈', label: 'Analytics', path: '/analytics', action: () => navigate('/analytics') },
-      { icon: '⚙️', label: 'Settings', path: '/settings', action: () => navigate('/settings') },
-      { icon: '🔒', label: 'Security', path: '/security', action: () => navigate('/security') },
+      { icon: '📊', label: 'Dashboard', path: '/dashboard/admin', action: () => navigate('/dashboard/admin') },
+      { icon: '👤', label: 'Profile', path: '/profile', action: () => navigate('/profile') },
     ],
   };
 

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import DashboardLayout from './DashboardLayout';
 import { Card, CardBody } from '../../components/Card';
 import { Button } from '../../components/Button';
@@ -11,6 +12,7 @@ import './Dashboard.css';
 
 const AdminDashboard = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [showAddUser, setShowAddUser] = useState(false);
 
   const users = [
@@ -41,9 +43,9 @@ const AdminDashboard = () => {
       key: 'role',
       label: 'Role',
       width: '15%',
-      render: (role) => (
-        <Badge variant={role === 'ADMIN' ? 'danger' : role === 'MANAGER' ? 'warning' : 'info'}>
-          {role}
+      render: (row) => (
+        <Badge variant={row.role === 'ADMIN' ? 'danger' : row.role === 'MANAGER' ? 'warning' : 'info'}>
+          {row.role}
         </Badge>
       ),
     },
@@ -51,9 +53,9 @@ const AdminDashboard = () => {
       key: 'status',
       label: 'Status',
       width: '15%',
-      render: (status) => (
-        <Badge variant={status === 'active' ? 'success' : 'default'}>
-          {status}
+      render: (row) => (
+        <Badge variant={row.status === 'active' ? 'success' : 'default'}>
+          {row.status}
         </Badge>
       ),
     },
@@ -68,9 +70,9 @@ const AdminDashboard = () => {
       key: 'type',
       label: 'Type',
       width: '25%',
-      render: (type) => (
-        <Badge variant={type === 'success' ? 'success' : type === 'warning' ? 'warning' : 'info'}>
-          {type}
+      render: (row) => (
+        <Badge variant={row.type === 'success' ? 'success' : row.type === 'warning' ? 'warning' : 'info'}>
+          {row.type}
         </Badge>
       ),
     },
@@ -98,8 +100,11 @@ const AdminDashboard = () => {
 
         {/* Action Bar */}
         <div className="action-bar">
-          <Button variant="primary" onClick={() => setShowAddUser(true)}>
-            + Add User
+          <Button variant="primary" onClick={() => navigate('/admin/users')}>
+            👥 Manage Users
+          </Button>
+          <Button variant="primary" onClick={() => navigate('/admin/audit-logs')}>
+            📋 Audit Logs
           </Button>
           <Button variant="secondary">
             Generate Report

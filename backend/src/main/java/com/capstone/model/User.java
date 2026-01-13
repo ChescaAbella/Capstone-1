@@ -30,9 +30,25 @@ public class User {
     
     private String picture;
     
+    // Profile fields
+    @Column(name = "phone_number")
+    private String phoneNumber;
+    
+    @Column(name = "department")
+    private String department;
+    
+    @Column(name = "bio", columnDefinition = "TEXT")
+    private String bio;
+    
+    @Column(name = "student_id")
+    private String studentId;
+    
+    @Column(name = "year_level")
+    private String yearLevel;
+    
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private Role role = Role.STUDENT;
+    private Role role = Role.MEMBER;
     
     // Track authentication provider
     @Enumerated(EnumType.STRING)
@@ -49,10 +65,17 @@ public class User {
     @Column(name = "email_verified")
     private boolean emailVerified = false;
     
+    // Active status for soft delete
+    @Column(name = "active", nullable = false, columnDefinition = "boolean default true")
+    private boolean active = true;
+    
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         lastLogin = LocalDateTime.now();
+        if (!emailVerified && authProvider == AuthProvider.GOOGLE) {
+            emailVerified = true; // Google users are pre-verified
+        }
     }
     
     @PreUpdate
@@ -61,7 +84,7 @@ public class User {
     }
     
     public enum Role {
-        STUDENT, LEADER, ADVISER
+        MEMBER, MANAGER, ADMIN
     }
     
     public enum AuthProvider {

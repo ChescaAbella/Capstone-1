@@ -16,7 +16,7 @@ import java.util.Map;
 public class StudentController {
 
     @GetMapping("/dashboard")
-    @PreAuthorize("hasRole('STUDENT')")
+    @PreAuthorize("hasRole('MEMBER')")
     public ResponseEntity<?> getStudentDashboard(@AuthenticationPrincipal User user) {
         Map<String, Object> response = new HashMap<>();
         response.put("message", "Welcome to Student Dashboard");
@@ -33,7 +33,7 @@ public class StudentController {
     }
 
     @GetMapping("/profile")
-    @PreAuthorize("hasRole('STUDENT')")
+    @PreAuthorize("hasRole('MEMBER')")
     public ResponseEntity<?> getProfile(@AuthenticationPrincipal User user) {
         Map<String, Object> profile = new HashMap<>();
         profile.put("id", user.getId());

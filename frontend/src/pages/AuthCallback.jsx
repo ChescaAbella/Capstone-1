@@ -81,9 +81,9 @@ export const AuthCallback = () => {
 
   const getDashboardPath = (role) => {
     const roleMap = {
-      'STUDENT': '/dashboard/member',
-      'LEADER': '/dashboard/manager',
-      'ADVISER': '/dashboard/admin',
+      'MEMBER': '/dashboard/member',
+      'MANAGER': '/dashboard/manager',
+      'ADMIN': '/dashboard/admin',
     };
     return roleMap[role] || '/dashboard';
   };

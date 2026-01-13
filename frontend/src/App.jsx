@@ -4,9 +4,13 @@ import { LandingPage } from './pages/LandingPage';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { VerificationPage } from './pages/VerificationPage';
+import { VerifyEmailPage } from './pages/VerifyEmail';
+import { VerificationPendingPage } from './pages/VerificationPending';
 import { AuthCallback } from './pages/AuthCallback';
-import { ProfilePage } from './pages/Profile/ProfilePage';
+import { EnhancedProfilePage } from './pages/Profile/EnhancedProfilePage';
 import { AdminPanel } from './pages/AdminPanel';
+import { AdminUsersPanel } from './pages/Admin/AdminUsersPanel';
+import AdminAuditLogs from './pages/Admin/AdminAuditLogs';
 import MemberDashboard from './pages/Dashboard/MemberDashboard';
 import ManagerDashboard from './pages/Dashboard/ManagerDashboard';
 import AdminDashboard from './pages/Dashboard/AdminDashboard';
@@ -19,6 +23,14 @@ import './styles/global.css';
 // Protected Route Component
 const ProtectedRoute = ({ children, requiredRole }) => {
   const { isAuthenticated, user, loading } = useAuth();
+
+  // Fallback to stored role in case user state hasn't hydrated yet
+  const storedRole = localStorage.getItem('userRole');
+
+  const normalizedUserRole = (user?.role || storedRole)
+    ? (user?.role || storedRole).replace(/^ROLE_/i, '').toUpperCase()
+    : undefined;
+  const normalizedRequiredRole = requiredRole?.toUpperCase();
 
   // Show loading state while checking authentication
   if (loading) {
@@ -34,14 +46,14 @@ const ProtectedRoute = ({ children, requiredRole }) => {
     );
   }
 
-  console.log('🔍 ProtectedRoute check:', { isAuthenticated, hasUser: !!user, requiredRole, userRole: user?.role });
+  console.log('🔍 ProtectedRoute check:', { isAuthenticated, hasUser: !!user, requiredRole: normalizedRequiredRole, userRole: normalizedUserRole });
 
   if (!isAuthenticated) {
     console.log('❌ Not authenticated, redirecting to login');
     return <Navigate to="/login" replace />;
   }
 
-  if (requiredRole && user?.role !== requiredRole) {
+  if (normalizedRequiredRole && normalizedUserRole !== normalizedRequiredRole) {
     console.log('❌ Wrong role, redirecting to dashboard');
     // Redirect to appropriate dashboard if wrong role
     return <Navigate to="/dashboard" replace />;
@@ -58,6 +70,8 @@ function AppContent() {
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/verify" element={<VerificationPage />} />
+      <Route path="/verify-email" element={<VerifyEmailPage />} />
+      <Route path="/verification-pending" element={<VerificationPendingPage />} />
       
       {/* OAuth Callback Route - IMPORTANT! */}
       <Route path="/auth/callback" element={<AuthCallback />} />
@@ -66,7 +80,7 @@ function AppContent() {
         path="/profile"
         element={
           <ProtectedRoute>
-            <ProfilePage />
+            <EnhancedProfilePage />
           </ProtectedRoute>
         }
       />
@@ -76,6 +90,24 @@ function AppContent() {
         element={
           <ProtectedRoute requiredRole="ADVISER">
             <AdminPanel />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/admin/users"
+        element={
+          <ProtectedRoute requiredRole="ADMIN">
+            <AdminUsersPanel />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/admin/audit-logs"
+        element={
+          <ProtectedRoute requiredRole="ADMIN">
+            <AdminAuditLogs />
           </ProtectedRoute>
         }
       />
@@ -93,7 +125,7 @@ function AppContent() {
       <Route
         path="/dashboard/member"
         element={
-          <ProtectedRoute requiredRole="STUDENT">
+          <ProtectedRoute requiredRole="MEMBER">
             <MemberDashboard />
           </ProtectedRoute>
         }
@@ -102,7 +134,7 @@ function AppContent() {
       <Route
         path="/member/deliverables"
         element={
-          <ProtectedRoute requiredRole="STUDENT">
+          <ProtectedRoute requiredRole="MEMBER">
             <MemberDeliverablesPage />
           </ProtectedRoute>
         }
@@ -111,7 +143,7 @@ function AppContent() {
       <Route
         path="/member/deliverables/:id"
         element={
-          <ProtectedRoute requiredRole="STUDENT">
+          <ProtectedRoute requiredRole="MEMBER">
             <DeliverableSubmitPage />
           </ProtectedRoute>
         }
@@ -120,7 +152,7 @@ function AppContent() {
       <Route
         path="/member/history"
         element={
-          <ProtectedRoute requiredRole="STUDENT">
+          <ProtectedRoute requiredRole="MEMBER">
             <HistoryPage />
           </ProtectedRoute>
         }
@@ -130,7 +162,7 @@ function AppContent() {
       <Route
         path="/dashboard/manager"
         element={
-          <ProtectedRoute requiredRole="LEADER">
+          <ProtectedRoute requiredRole="MANAGER">
             <ManagerDashboard />
           </ProtectedRoute>
         }
@@ -140,7 +172,7 @@ function AppContent() {
       <Route
         path="/dashboard/admin"
         element={
-          <ProtectedRoute requiredRole="ADVISER">
+          <ProtectedRoute requiredRole="ADMIN">
             <AdminDashboard />
           </ProtectedRoute>
         }
@@ -154,13 +186,16 @@ function AppContent() {
 // Dashboard Router Component - Updated to match backend roles
 function DashboardRouter() {
   const { user } = useAuth();
+  const storedRole = localStorage.getItem('userRole');
+  const roleSource = user?.role || storedRole;
+  const role = roleSource ? roleSource.replace(/^ROLE_/i, '').toUpperCase() : undefined;
 
   // Map backend roles to frontend dashboards
-  if (user?.role === 'STUDENT') {
+  if (role === 'MEMBER') {
     return <Navigate to="/dashboard/member" replace />;
-  } else if (user?.role === 'LEADER') {
+  } else if (role === 'MANAGER') {
     return <Navigate to="/dashboard/manager" replace />;
-  } else if (user?.role === 'ADVISER') {
+  } else if (role === 'ADMIN') {
     return <Navigate to="/dashboard/admin" replace />;
   }
 

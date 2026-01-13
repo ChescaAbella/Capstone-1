@@ -18,7 +18,7 @@ export const RegisterPage = () => {
     email: '',
     password: '',
     confirmPassword: '',
-    role: 'STUDENT',
+    role: 'MEMBER',
   });
 
   const handleGoogleSignup = () => {
@@ -45,6 +45,11 @@ export const RegisterPage = () => {
     setError('');
 
     // Validation
+    if (!formData.email.endsWith('@cit.edu')) {
+      setError('Please use a valid school email address (must end with @cit.edu)');
+      return;
+    }
+
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match');
       return;
@@ -62,13 +67,8 @@ export const RegisterPage = () => {
       const result = await signup(signupData);
 
       if (result.success) {
-        // Redirect based on role - Match your App.jsx routes
-        const roleRoutes = {
-          STUDENT: '/dashboard/member',
-          LEADER: '/dashboard/manager',
-          ADVISER: '/dashboard/admin',
-        };
-        navigate(roleRoutes[result.user.role] || '/dashboard');
+        // For email/password signups, redirect to verification pending page
+        navigate('/verification-pending');
       }
     } catch (err) {
       setError(err.message || 'Signup failed. Please try again.');
@@ -123,11 +123,16 @@ export const RegisterPage = () => {
                   required
                   value={formData.email}
                   onChange={handleChange}
-                  placeholder="you@yourschool.edu"
+                  placeholder="you@cit.edu"
                   className="form-input"
                 />
                 <small className="form-hint">
-                  Must use your school email address
+                  Must use your school email (@cit.edu)
+                  {formData.email && (
+                    <span style={{marginLeft: '0.5rem'}}>
+                      {formData.email.endsWith('@cit.edu') ? '✅' : '❌'}
+                    </span>
+                  )}
                 </small>
               </div>
 
@@ -140,9 +145,9 @@ export const RegisterPage = () => {
                   onChange={handleChange}
                   className="form-input"
                 >
-                  <option value="STUDENT">Student</option>
-                  <option value="LEADER">Leader</option>
-                  <option value="ADVISER">Adviser</option>
+                  <option value="MEMBER">Member</option>
+                  <option value="MANAGER">Manager</option>
+                  <option value="ADMIN">Admin</option>
                 </select>
               </div>
 

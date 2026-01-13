@@ -57,14 +57,17 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/", "/error", "/oauth2/**", "/login/**").permitAll()
                 .requestMatchers("/api/auth/oauth2/**").permitAll()
-                .requestMatchers("/api/auth/signup").permitAll()  // NEW
-                .requestMatchers("/api/auth/login").permitAll()   // NEW
+                .requestMatchers("/api/auth/signup").permitAll()
+                .requestMatchers("/api/auth/login").permitAll()
+                .requestMatchers("/api/auth/verify-email").permitAll()
+                .requestMatchers("/api/auth/resend-verification").permitAll()
+                .requestMatchers("/api/auth/verification-status").permitAll()
                 .requestMatchers("/api/auth/refresh").permitAll()
                 .requestMatchers("/api/auth/validate").permitAll()
                 .requestMatchers("/api/auth/update-role").permitAll()
-                .requestMatchers("/api/student/**").hasRole("STUDENT")
-                .requestMatchers("/api/leader/**").hasRole("LEADER")
-                .requestMatchers("/api/adviser/**").hasRole("ADVISER")
+                .requestMatchers("/api/student/**").hasRole("MEMBER")
+                .requestMatchers("/api/leader/**").hasRole("MANAGER")
+                .requestMatchers("/api/adviser/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
             )
             .oauth2Login(oauth2 -> oauth2
@@ -91,7 +94,7 @@ public class SecurityConfig {
             configuration.setAllowedOrigins(List.of("http://localhost:5173"));
         }
         
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
         

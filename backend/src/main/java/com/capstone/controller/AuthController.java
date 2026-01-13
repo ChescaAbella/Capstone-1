@@ -4,10 +4,15 @@ import com.capstone.dto.*;
 import com.capstone.exception.TokenRefreshException;
 import com.capstone.model.RefreshToken;
 import com.capstone.model.User;
+import com.capstone.model.EmailVerificationToken;
 import com.capstone.security.JwtUtil;
 import com.capstone.service.RefreshTokenService;
 import com.capstone.service.UserService;
+import com.capstone.service.EmailVerificationService;
+import com.capstone.service.LoginAuditLogService;
+import com.capstone.util.IpAddressUtil;
 import jakarta.validation.Valid;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -26,6 +31,12 @@ public class AuthController {
 
     @Autowired
     private RefreshTokenService refreshTokenService;
+
+    @Autowired
+    private EmailVerificationService emailVerificationService;
+
+    @Autowired
+    private LoginAuditLogService loginAuditLogService;
 
     // ===== NEW ENDPOINTS FOR EMAIL/PASSWORD AUTH =====
     
@@ -59,11 +70,23 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> loginUser(@Valid @RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<?> loginUser(@Valid @RequestBody LoginRequest loginRequest, HttpServletRequest request) {
+        String ipAddress = IpAddressUtil.getClientIpAddress(request);
+        String userAgent = request.getHeader("User-Agent");
+
         try {
             User user = userService.authenticateUser(
                     loginRequest.getEmail(),
                     loginRequest.getPassword()
+            );
+            
+            // Log successful login
+            loginAuditLogService.logSuccessfulLogin(
+                    user.getId(),
+                    user.getEmail(),
+                    ipAddress,
+                    userAgent,
+                    "EMAIL_PASSWORD"
             );
             
             // Generate tokens
@@ -85,6 +108,14 @@ public class AuthController {
                     userInfo
             ));
         } catch (RuntimeException e) {
+            // Log failed login
+            loginAuditLogService.logFailedLogin(
+                    loginRequest.getEmail(),
+                    ipAddress,
+                    userAgent,
+                    e.getMessage()
+            );
+            
             return ResponseEntity.status(401)
                     .body(new MessageResponse(e.getMessage()));
         }
@@ -182,5 +213,60 @@ public class AuthController {
             return ResponseEntity.badRequest()
                     .body(new MessageResponse(e.getMessage()));
         }
+    }
+
+    // ===== EMAIL VERIFICATION ENDPOINTS =====
+
+    @PostMapping("/verify-email")
+    public ResponseEntity<?> verifyEmail(@RequestParam String token) {
+        try {
+            emailVerificationService.verifyEmail(token);
+            return ResponseEntity.ok(new MessageResponse("Email verified successfully!"));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest()
+                    .body(new MessageResponse(e.getMessage()));
+        }
+    }
+
+    @PostMapping("/resend-verification")
+    public ResponseEntity<?> resendVerification(@RequestParam(required = false) String email,
+                                                 @AuthenticationPrincipal User user) {
+        try {
+            User targetUser = null;
+            
+            // Use authenticated user if available, otherwise use email parameter
+            if (user != null) {
+                targetUser = user;
+            } else if (email != null && !email.isEmpty()) {
+                targetUser = userService.findByEmail(email)
+                        .orElseThrow(() -> new RuntimeException("User not found"));
+            } else {
+                return ResponseEntity.badRequest()
+                        .body(new MessageResponse("Either authentication or email parameter is required"));
+            }
+            
+            EmailVerificationToken token = emailVerificationService.resendVerificationToken(targetUser.getId());
+            String verificationLink = emailVerificationService.generateVerificationLink(token);
+            
+            // In production, send email here
+            // For now, return the link in response (frontend should copy link or mock email)
+            return ResponseEntity.ok(new MessageResponse(
+                    "Verification email sent! Link: " + verificationLink
+            ));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest()
+                    .body(new MessageResponse(e.getMessage()));
+        }
+    }
+
+    @GetMapping("/verification-status")
+    public ResponseEntity<?> getVerificationStatus(@AuthenticationPrincipal User user) {
+        if (user == null) {
+            return ResponseEntity.status(401).body(new MessageResponse("Unauthorized"));
+        }
+
+        return ResponseEntity.ok(new MessageResponse(
+                user.isEmailVerified() ? "Email verified" : "Email not verified"
+        ));
     }
 }

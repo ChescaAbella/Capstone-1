@@ -43,7 +43,7 @@ public class UserService {
             newUser.setEmail(email);
             newUser.setName(name);
             newUser.setPicture(picture);
-            newUser.setRole(User.Role.STUDENT); // Default role
+            newUser.setRole(User.Role.MEMBER); // Default role
             newUser.setAuthProvider(User.AuthProvider.GOOGLE);
             newUser.setEmailVerified(true); // Google emails are pre-verified
             return userRepository.save(newUser);
@@ -74,7 +74,7 @@ public class UserService {
         try {
             role = User.Role.valueOf(signupRequest.getRole().toUpperCase());
         } catch (IllegalArgumentException e) {
-            throw new RuntimeException("Invalid role. Must be STUDENT, LEADER, or ADVISER");
+            throw new RuntimeException("Invalid role. Must be MEMBER, MANAGER, or ADMIN");
         }
 
         // Create new user with email/password
@@ -133,5 +133,45 @@ public class UserService {
 
     public boolean existsByEmail(String email) {
         return userRepository.existsByEmail(email);
+    }
+
+    public User findById(Long id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
+    }
+
+    @Transactional
+    public User saveUser(User user) {
+        return userRepository.save(user);
+    }
+
+    @Transactional
+    public User updateProfile(Long userId, com.capstone.dto.ProfileUpdateRequest request) {
+        User user = findById(userId);
+        
+        // Update fields if provided
+        if (request.getName() != null && !request.getName().trim().isEmpty()) {
+            user.setName(request.getName());
+        }
+        if (request.getPhoneNumber() != null) {
+            user.setPhoneNumber(request.getPhoneNumber());
+        }
+        if (request.getDepartment() != null) {
+            user.setDepartment(request.getDepartment());
+        }
+        if (request.getBio() != null) {
+            user.setBio(request.getBio());
+        }
+        if (request.getStudentId() != null) {
+            user.setStudentId(request.getStudentId());
+        }
+        if (request.getYearLevel() != null) {
+            user.setYearLevel(request.getYearLevel());
+        }
+        if (request.getPicture() != null) {
+            user.setPicture(request.getPicture());
+        }
+        
+        return userRepository.save(user);
     }
 }
