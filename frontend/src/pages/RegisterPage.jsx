@@ -1,124 +1,80 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 import { AuthLayout, Container } from '../components/Layout';
 import { Button } from '../components/Button';
-import { Input, Select } from '../components/Input';
 import { Alert } from '../components/Alert';
+import { initiateGoogleLogin } from '../services/authService';
 import { useAuth } from '../context/AuthContext';
-import { GOOGLE_CLIENT_ID } from '../services/googleOAuth';
 import './Auth.css';
 
 export const RegisterPage = () => {
   const navigate = useNavigate();
-  const { login, loginWithGoogle } = useAuth();
+  const { signup } = useAuth();
+  const [error, setError] = useState('');
+  const [googleLoading, setGoogleLoading] = useState(false);
+  const [emailLoading, setEmailLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     password: '',
     confirmPassword: '',
-    studentId: '',
-    team: '',
+    role: 'STUDENT',
   });
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [googleLoading, setGoogleLoading] = useState(false);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const handleRegister = (e) => {
-    e.preventDefault();
-    setError('');
-    setSuccess('');
-    setLoading(true);
-
-    // Validation
-    if (!formData.name || !formData.email || !formData.password || !formData.confirmPassword) {
-      setError('Please fill in all required fields');
-      setLoading(false);
-      return;
-    }
-
-    if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match');
-      setLoading(false);
-      return;
-    }
-
-    if (formData.password.length < 6) {
-      setError('Password must be at least 6 characters');
-      setLoading(false);
-      return;
-    }
-
-    // Call backend API
-    fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'}/api/auth/register`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        email: formData.email,
-        password: formData.password,
-        name: formData.name,
-        studentId: formData.studentId,
-        team: formData.team,
-      }),
-    })
-      .then((res) => {
-        if (!res.ok) {
-          return res.json().then((data) => {
-            throw new Error(data.error || 'Registration failed');
-          });
-        }
-        return res.json();
-      })
-      .then((data) => {
-        setSuccess('Registration successful! Check your email to verify your account.');
-        // Clear form
-        setFormData({
-          name: '',
-          email: '',
-          password: '',
-          confirmPassword: '',
-          studentId: '',
-          team: '',
-        });
-        // Redirect to login after 2 seconds
-        setTimeout(() => {
-          navigate('/login');
-        }, 2000);
-      })
-      .catch((err) => {
-        setError(err.message || 'Registration failed. Please try again.');
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  };
-
-  const handleGoogleSuccess = async (credentialResponse) => {
+  const handleGoogleSignup = () => {
     setGoogleLoading(true);
     setError('');
     try {
-      await loginWithGoogle(credentialResponse.credential);
-      navigate('/dashboard');
+      initiateGoogleLogin();
     } catch (err) {
-      setError(err.message || 'Google registration failed. Please try again.');
+      setError(err.message || 'Failed to initiate Google signup');
       setGoogleLoading(false);
     }
   };
 
-  const handleGoogleError = () => {
-    setError('Google registration failed. Please try again.');
-    setGoogleLoading(false);
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+    setError('');
+  };
+
+  const handleEmailSignup = async (e) => {
+    e.preventDefault();
+    setError('');
+
+    // Validation
+    if (formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+
+    if (formData.password.length < 8) {
+      setError('Password must be at least 8 characters long');
+      return;
+    }
+
+    setEmailLoading(true);
+
+    try {
+      const { confirmPassword, ...signupData } = formData;
+      const result = await signup(signupData);
+
+      if (result.success) {
+        // Redirect based on role - Match your App.jsx routes
+        const roleRoutes = {
+          STUDENT: '/dashboard/member',
+          LEADER: '/dashboard/manager',
+          ADVISER: '/dashboard/admin',
+        };
+        navigate(roleRoutes[result.user.role] || '/dashboard');
+      }
+    } catch (err) {
+      setError(err.message || 'Signup failed. Please try again.');
+    } finally {
+      setEmailLoading(false);
+    }
   };
 
   return (
@@ -139,120 +95,118 @@ export const RegisterPage = () => {
             />
           )}
 
-          {success && (
-            <Alert
-              type="success"
-              title="Success"
-              message={success}
-              onClose={() => setSuccess('')}
-            />
-          )}
+          <div className="auth-form">
+            <p className="auth-subtitle">Sign up with your school email</p>
 
-          {/* Google Sign-Up */}
-          {GOOGLE_CLIENT_ID && GOOGLE_CLIENT_ID !== 'YOUR_GOOGLE_CLIENT_ID' ? (
-            <>
-              <div className="google-signup-section">
-                <p className="google-signup-text">Sign up with Google</p>
-                <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
-                  <div className="google-login-container">
-                    <GoogleLogin
-                      onSuccess={handleGoogleSuccess}
-                      onError={handleGoogleError}
-                      useOneTap
-                      theme="outline"
-                      size="large"
-                      width="100%"
-                    />
-                  </div>
-                </GoogleOAuthProvider>
+            {/* Email/Password Signup Form */}
+            <form onSubmit={handleEmailSignup}>
+              <div className="form-group">
+                <label htmlFor="name">Full Name</label>
+                <input
+                  id="name"
+                  name="name"
+                  type="text"
+                  required
+                  value={formData.name}
+                  onChange={handleChange}
+                  placeholder="John Doe"
+                  className="form-input"
+                />
               </div>
 
-              {/* Divider */}
-              <div className="auth-divider">
-                <span>OR</span>
+              <div className="form-group">
+                <label htmlFor="email">School Email</label>
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  required
+                  value={formData.email}
+                  onChange={handleChange}
+                  placeholder="you@yourschool.edu"
+                  className="form-input"
+                />
+                <small className="form-hint">
+                  Must use your school email address
+                </small>
               </div>
-            </>
-          ) : null}
 
-          <form onSubmit={handleRegister} className="auth-form">
-            <Input
-              label="Full Name"
-              type="text"
-              name="name"
-              placeholder="John Doe"
-              value={formData.name}
-              onChange={handleChange}
-              disabled={loading || googleLoading}
-              required
-            />
+              <div className="form-group">
+                <label htmlFor="role">Role</label>
+                <select
+                  id="role"
+                  name="role"
+                  value={formData.role}
+                  onChange={handleChange}
+                  className="form-input"
+                >
+                  <option value="STUDENT">Student</option>
+                  <option value="LEADER">Leader</option>
+                  <option value="ADVISER">Adviser</option>
+                </select>
+              </div>
 
-            <Input
-              label="Email (Institutional)"
-              type="email"
-              name="email"
-              placeholder="john@school.edu"
-              value={formData.email}
-              onChange={handleChange}
-              disabled={loading || googleLoading}
-              required
-            />
+              <div className="form-group">
+                <label htmlFor="password">Password</label>
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  required
+                  value={formData.password}
+                  onChange={handleChange}
+                  placeholder="Minimum 8 characters"
+                  className="form-input"
+                />
+              </div>
 
-            <Input
-              label="Student ID (Optional)"
-              type="text"
-              name="studentId"
-              placeholder="2024-001"
-              value={formData.studentId}
-              onChange={handleChange}
-              disabled={loading || googleLoading}
-            />
+              <div className="form-group">
+                <label htmlFor="confirmPassword">Confirm Password</label>
+                <input
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  type="password"
+                  required
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  placeholder="Re-enter your password"
+                  className="form-input"
+                />
+              </div>
 
-            <Input
-              label="Team (Optional)"
-              type="text"
-              name="team"
-              placeholder="Team A"
-              value={formData.team}
-              onChange={handleChange}
-              disabled={loading || googleLoading}
-            />
+              <Button
+                type="submit"
+                variant="primary"
+                fullWidth
+                disabled={emailLoading}
+                style={{ marginTop: '1rem' }}
+              >
+                {emailLoading ? 'Creating account...' : 'Sign up'}
+              </Button>
+            </form>
 
-            <Input
-              label="Password"
-              type="password"
-              name="password"
-              placeholder="••••••••"
-              value={formData.password}
-              onChange={handleChange}
-              disabled={loading || googleLoading}
-              required
-            />
+            {/* Divider */}
+            <div className="auth-divider">
+              <span>OR</span>
+            </div>
 
-            <Input
-              label="Confirm Password"
-              type="password"
-              name="confirmPassword"
-              placeholder="••••••••"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              disabled={loading || googleLoading}
-              required
-            />
-
+            {/* Google OAuth Button */}
             <Button
-              type="submit"
-              variant="primary"
+              type="button"
+              variant="outline"
               fullWidth
-              disabled={loading || googleLoading}
+              onClick={handleGoogleSignup}
+              disabled={googleLoading}
             >
-              {loading ? 'Creating Account...' : 'Create Account'}
+              {googleLoading ? 'Redirecting...' : '🔐 Sign up with Google'}
             </Button>
-          </form>
 
-          <div className="auth-footer">
-            <p>
-              Already have an account? <Link to="/login">Sign In</Link>
-            </p>
+            {/* Login link */}
+            <div className="auth-footer" style={{ marginTop: '1.5rem', textAlign: 'center' }}>
+              <p>
+                Already have an account? <Link to="/login">Sign In</Link>
+              </p>
+            </div>
           </div>
         </div>
       </Container>

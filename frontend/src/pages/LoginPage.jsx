@@ -1,74 +1,75 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 import { AuthLayout, Container } from '../components/Layout';
 import { Button } from '../components/Button';
-import { Input, Select } from '../components/Input';
 import { Alert } from '../components/Alert';
+import { initiateGoogleLogin } from '../services/authService';
 import { useAuth } from '../context/AuthContext';
-import { GOOGLE_CLIENT_ID } from '../services/googleOAuth';
 import './Auth.css';
 
 export const LoginPage = () => {
   const navigate = useNavigate();
-  const { login, loginWithGoogle } = useAuth();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [role, setRole] = useState('contributor');
+  const { login } = useAuth();
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [emailLoading, setEmailLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+  });
 
-  const handleLogin = (e) => {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
-
-    // Call backend API
-    fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'}/api/auth/login`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ email, password, role }),
-    })
-      .then((res) => {
-        if (!res.ok) {
-          return res.json().then((data) => {
-            throw new Error(data.error || 'Invalid credentials');
-          });
-        }
-        return res.json();
-      })
-      .then((data) => {
-        login(email, password, data.user);
-        
-        // Redirect to dashboard (role-based routing happens in App.jsx)
-        navigate('/dashboard');
-      })
-      .catch((err) => {
-        setError(err.message || 'Login failed. Please try again.');
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  };
-
-  const handleGoogleSuccess = async (credentialResponse) => {
+  const handleGoogleLogin = () => {
     setGoogleLoading(true);
     setError('');
     try {
-      await loginWithGoogle(credentialResponse.credential);
-      navigate('/dashboard');
+      initiateGoogleLogin();
     } catch (err) {
-      setError(err.message || 'Google login failed. Please try again.');
+      setError(err.message || 'Failed to initiate Google login');
       setGoogleLoading(false);
     }
   };
 
-  const handleGoogleError = () => {
-    setError('Google login failed. Please try again.');
-    setGoogleLoading(false);
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+    setError('');
+  };
+
+  const handleEmailLogin = async (e) => {
+    e.preventDefault();
+    setError('');
+    setEmailLoading(true);
+
+    try {
+      console.log('🔄 Login attempt with:', formData.email);
+      const result = await login(formData);
+      console.log('✅ Login result:', result);
+      
+      if (result.success && result.user) {
+        console.log('👤 User role:', result.user.role);
+        
+        // Redirect based on role - Match your App.jsx routes
+        const roleRoutes = {
+          STUDENT: '/dashboard/member',
+          LEADER: '/dashboard/manager',
+          ADVISER: '/dashboard/admin',
+        };
+        
+        const targetRoute = roleRoutes[result.user.role] || '/dashboard';
+        console.log('🔄 Redirecting to:', targetRoute);
+        navigate(targetRoute, { replace: true });
+      } else {
+        console.error('❌ Login succeeded but no user data');
+        setError('Login succeeded but user data is missing');
+      }
+    } catch (err) {
+      console.error('❌ Login error:', err);
+      setError(err.message || 'Login failed. Please check your credentials.');
+    } finally {
+      setEmailLoading(false);
+    }
   };
 
   return (
@@ -89,75 +90,69 @@ export const LoginPage = () => {
             />
           )}
 
-          <form onSubmit={handleLogin} className="auth-form">
-            <Input
-              label="Email"
-              type="email"
-              placeholder="your@email.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              disabled={loading || googleLoading}
-            />
+          <div className="auth-form">
+            <p className="auth-subtitle">Sign in to your account</p>
 
-            <Input
-              label="Password"
-              type="password"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              disabled={loading || googleLoading}
-            />
-
-            <Select
-              label="Role"
-              options={[
-                { value: 'contributor', label: 'Contributor / Submitter' },
-                { value: 'manager', label: 'Manager / Coordinator' },
-                { value: 'admin', label: 'Administrator' },
-              ]}
-              value={role}
-              onChange={(e) => setRole(e.target.value)}
-              disabled={loading || googleLoading}
-            />
-
-            <Button
-              type="submit"
-              variant="primary"
-              fullWidth
-              disabled={loading || googleLoading}
-            >
-              {loading ? 'Logging in...' : 'Login'}
-            </Button>
-          </form>
-
-          {/* Divider */}
-          <div className="auth-divider">
-            <span>OR</span>
-          </div>
-
-          {/* Google Sign-In */}
-          {GOOGLE_CLIENT_ID && GOOGLE_CLIENT_ID !== 'YOUR_GOOGLE_CLIENT_ID' ? (
-            <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
-              <div className="google-login-container">
-                <GoogleLogin
-                  onSuccess={handleGoogleSuccess}
-                  onError={handleGoogleError}
-                  useOneTap
-                  theme="outline"
-                  size="large"
-                  width="100%"
+            {/* Email/Password Login Form */}
+            <form onSubmit={handleEmailLogin}>
+              <div className="form-group">
+                <label htmlFor="email">Email Address</label>
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  required
+                  value={formData.email}
+                  onChange={handleChange}
+                  placeholder="you@yourschool.edu"
+                  className="form-input"
                 />
               </div>
-            </GoogleOAuthProvider>
-          ) : (
-            <div className="auth-notice">
-              <p>⚠️ Google OAuth not configured. Set VITE_GOOGLE_CLIENT_ID environment variable.</p>
-            </div>
-          )}
 
-          <div className="auth-footer">
-            <p>
-              Don't have an account? <Link to="/register">Sign Up</Link>
+              <div className="form-group">
+                <label htmlFor="password">Password</label>
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  required
+                  value={formData.password}
+                  onChange={handleChange}
+                  placeholder="Enter your password"
+                  className="form-input"
+                />
+              </div>
+
+              <Button
+                type="submit"
+                variant="primary"
+                fullWidth
+                disabled={emailLoading}
+              >
+                {emailLoading ? 'Signing in...' : 'Sign in with Email'}
+              </Button>
+            </form>
+
+            {/* Divider */}
+            <div className="auth-divider">
+              <span>OR</span>
+            </div>
+
+            {/* Google OAuth Button */}
+            <Button
+              type="button"
+              variant="outline"
+              fullWidth
+              onClick={handleGoogleLogin}
+              disabled={googleLoading}
+            >
+              {googleLoading ? 'Redirecting...' : '🔐 Sign in with Google'}
+            </Button>
+
+            {/* Sign up link */}
+            <p className="auth-link">
+              Don't have an account?{' '}
+              <Link to="/register">Sign up here</Link>
             </p>
           </div>
         </div>
