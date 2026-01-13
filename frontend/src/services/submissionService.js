@@ -15,6 +15,10 @@ const getAuthHeader = () => {
  * Handle API response errors
  */
 const handleResponse = async (response) => {
+  if (response.status === 404) {
+    // Return null for 404 instead of throwing
+    return null;
+  }
   if (!response.ok) {
     const error = await response.json().catch(() => ({ message: 'An error occurred' }));
     throw new Error(error.message || `HTTP error! status: ${response.status}`);
@@ -112,4 +116,32 @@ export const getUserSubmissions = async () => {
     }
   );
   return handleResponse(response);
+};
+
+/**
+ * Download file for a submission
+ * @param {number} submissionId - Submission ID
+ * @param {string} fileName - Original file name for download
+ */
+export const downloadFile = async (submissionId, fileName) => {
+  const response = await fetch(
+    `${API_URL}/api/v1/submissions/${submissionId}/download`,
+    {
+      headers: getAuthHeader()
+    }
+  );
+  
+  if (!response.ok) {
+    throw new Error(`Download failed: ${response.status}`);
+  }
+  
+  const blob = await response.blob();
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = fileName;
+  document.body.appendChild(a);
+  a.click();
+  window.URL.revokeObjectURL(url);
+  document.body.removeChild(a);
 };

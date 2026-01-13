@@ -9,6 +9,7 @@ import {
   formatDeadline
 } from '../../services/deliverableService';
 import { getActiveTeams } from '../../services/teamService';
+import { getLatestSubmission } from '../../services/submissionService';
 import './Deliverables.css';
 
 const MemberDeliverablesPage = () => {
@@ -42,17 +43,43 @@ const MemberDeliverablesPage = () => {
         teams.map(team => getDeliverablesByTeam(team.id))
       );
       
-      // Flatten and process deliverables
-      const processedDeliverables = allDeliverables
-        .flat()
-        .map(deliv => ({
-          ...deliv,
-          daysRemaining: calculateDaysRemaining(deliv.deadline),
-          status: getDeliverableStatus(deliv.progress, deliv.deadline)
-        }))
-        .sort((a, b) => new Date(a.deadline) - new Date(b.deadline));
+      // Flatten deliverables
+      const flatDeliverables = allDeliverables.flat();
       
-      setDeliverables(processedDeliverables);
+      // Fetch submission status for each deliverable
+      const deliverablesWithSubmissions = await Promise.all(
+        flatDeliverables.map(async (deliv) => {
+          try {
+            const submission = await getLatestSubmission(deliv.id);
+            if (submission) {
+              return {
+                ...deliv,
+                hasSubmission: true,
+                submissionStatus: submission.status,
+                submittedAt: submission.createdAt,
+                daysRemaining: calculateDaysRemaining(deliv.dueDate),
+                status: getDeliverableStatus(deliv.progressPercentage, deliv.dueDate)
+              };
+            }
+          } catch (err) {
+            // Error fetching submission
+            console.error(`Error fetching submission for deliverable ${deliv.id}:`, err);
+          }
+          // No submission found
+          return {
+            ...deliv,
+            hasSubmission: false,
+            daysRemaining: calculateDaysRemaining(deliv.dueDate),
+            status: getDeliverableStatus(deliv.progressPercentage, deliv.dueDate)
+          };
+        })
+      );
+      
+      // Sort by deadline
+      const sortedDeliverables = deliverablesWithSubmissions
+        .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
+      
+      setDeliverables(sortedDeliverables);
     } catch (err) {
       setError('Failed to load deliverables: ' + err.message);
       console.error(err);
@@ -138,7 +165,7 @@ const MemberDeliverablesPage = () => {
                   onClick={() => handleCardClick(deliverable)}
                 >
                   <div className="card-header">
-                    <h3>{deliverable.title}</h3>
+                    <h3>{deliverable.name}</h3>
                     <span
                       className="status-badge"
                       style={{ backgroundColor: getStatusColor(deliverable.status) }}
@@ -147,12 +174,18 @@ const MemberDeliverablesPage = () => {
                     </span>
                   </div>
 
+                  {deliverable.hasSubmission && (
+                    <div className="submission-indicator">
+                      ✓ Submitted - {deliverable.submissionStatus}
+                    </div>
+                  )}
+
                   <p className="card-description">{deliverable.description}</p>
 
                   <div className="card-footer">
                     <div className="deadline-info">
                       <span className="deadline-label">Deadline:</span>
-                      <span className="deadline-date">{formatDeadline(deliverable.deadline)}</span>
+                      <span className="deadline-date">{formatDeadline(deliverable.dueDate)}</span>
                     </div>
                     <div className={`days-remaining ${deliverable.status}`}>
                       {deliverable.daysRemaining > 0
@@ -163,7 +196,7 @@ const MemberDeliverablesPage = () => {
 
                   <div className="card-action">
                     <button className="submit-btn">
-                      {deliverable.status === 'overdue' ? '⚠️ Submit Now' : '📤 Submit'}
+                      {deliverable.hasSubmission ? '✓ View Submission' : (deliverable.status === 'overdue' ? '⚠️ Submit Now' : '📤 Submit')}
                     </button>
                   </div>
                 </div>

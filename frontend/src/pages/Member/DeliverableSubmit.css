@@ -293,6 +293,108 @@
   opacity: 0.6;
 }
 
+/* Submission Info */
+.submission-info {
+  background-color: #f8f9fa;
+  border: 1px solid #e0e0e0;
+  border-radius: var(--border-radius-md, 6px);
+  padding: var(--spacing-lg, 20px);
+  margin-bottom: var(--spacing-lg, 20px);
+}
+
+.info-row {
+  display: flex;
+  margin-bottom: var(--spacing-md, 12px);
+  align-items: flex-start;
+}
+
+.info-row:last-child {
+  margin-bottom: 0;
+}
+
+.info-row label {
+  font-weight: 600;
+  color: var(--text-secondary, #666);
+  min-width: 120px;
+  margin-right: var(--spacing-sm, 8px);
+}
+
+.info-row p {
+  margin: 0;
+  color: var(--text-primary, #333);
+  flex: 1;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.status-submitted {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.status-approved {
+  background-color: #d1ecf1;
+  color: #0c5460;
+}
+
+.status-rejected {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.submission-actions {
+  display: flex;
+  gap: var(--spacing-md, 12px);
+  margin-top: var(--spacing-lg, 16px);
+}
+
+.download-btn {
+  flex: 1;
+  padding: var(--spacing-md, 12px) var(--spacing-lg, 24px);
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: var(--border-radius-md, 6px);
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-height: 44px;
+}
+
+.download-btn:hover {
+  background-color: #0056b3;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+}
+
+.resubmit-btn {
+  flex: 1;
+  padding: var(--spacing-md, 12px) var(--spacing-lg, 24px);
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: var(--border-radius-md, 6px);
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-height: 44px;
+}
+
+.resubmit-btn:hover {
+  background-color: #218838;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
 /* Alerts */
 .alert {
   padding: var(--spacing-md, 12px) var(--spacing-lg, 16px);

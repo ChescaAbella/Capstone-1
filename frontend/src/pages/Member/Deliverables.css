@@ -118,6 +118,19 @@
   flex-shrink: 0;
 }
 
+.submission-indicator {
+  background-color: #d4edda;
+  color: #155724;
+  padding: var(--spacing-xs, 6px) var(--spacing-sm, 10px);
+  border-radius: var(--border-radius-sm, 4px);
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-bottom: var(--spacing-sm, 8px);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
 .card-description {
   color: var(--text-secondary, #666);
   font-size: 0.8rem;

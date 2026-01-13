@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '../Dashboard/DashboardLayout';
+import { getUserSubmissions } from '../../services/submissionService';
 import './History.css';
 
 const HistoryPage = () => {
@@ -15,6 +16,37 @@ const HistoryPage = () => {
   }, []);
 
   const fetchSubmissions = async () => {
+    try {
+      setLoading(true);
+      const data = await getUserSubmissions();
+      
+      // Transform API data to match display format
+      const transformedData = data.map(sub => ({
+        id: sub.id,
+        title: sub.deliverableName || 'Deliverable',
+        submittedDate: new Date(sub.createdAt).toLocaleDateString(),
+        submittedTime: new Date(sub.createdAt).toLocaleTimeString(),
+        status: sub.status.toLowerCase(),
+        fileName: sub.fileName,
+        fileSize: `${(sub.fileSize / 1024 / 1024).toFixed(2)} MB`,
+        grade: null,
+        feedback: sub.feedback || 'Pending review',
+        version: sub.versionNumber,
+        submittedBy: sub.submittedBy
+      }));
+      
+      setSubmissions(transformedData);
+      setError('');
+    } catch (err) {
+      // If API fails, show empty state
+      setSubmissions([]);
+      setError('');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchSubmissionsOld = async () => {
     try {
       setLoading(true);
       // Mock data - replace with actual API call

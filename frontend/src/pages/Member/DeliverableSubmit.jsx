@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useLocation, useParams } from 'react-router-dom';
 import { DashboardLayout } from '../../components/Layout';
-import { submitFile } from '../../services/submissionService';
+import { submitFile, getLatestSubmission, downloadFile } from '../../services/submissionService';
 import './DeliverableSubmit.css';
 
 export const DeliverableSubmitPage = () => {
@@ -12,10 +12,28 @@ export const DeliverableSubmitPage = () => {
 
   const [file, setFile] = useState(null);
   const [fileName, setFileName] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [dragActive, setDragActive] = useState(false);
+  const [existingSubmission, setExistingSubmission] = useState(null);
+
+  useEffect(() => {
+    fetchSubmission();
+  }, [id]);
+
+  const fetchSubmission = async () => {
+    try {
+      setLoading(true);
+      const submission = await getLatestSubmission(id);
+      setExistingSubmission(submission);
+    } catch (err) {
+      // No submission found, that's okay
+      setExistingSubmission(null);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleGoBack = () => {
     navigate('/member/deliverables');
@@ -104,8 +122,20 @@ export const DeliverableSubmitPage = () => {
       }, 2000);
     } catch (err) {
       setError('Failed to submit file: ' + err.message);
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <DashboardLayout>
+      <div className="deliverable-submit-page">
+        <div className="submit-header">
+          <button className="back-btn" onClick={handleGoBack}>
+            ← Back to Deliverables
           </button>
-          <h1>{deliverable.title || 'Submit Deliverable'}</h1>
+          <h1>{deliverable.name || deliverable.title || 'Submit Deliverable'}</h1>
         </div>
 
         <div className="submit-container">
@@ -116,11 +146,11 @@ export const DeliverableSubmitPage = () => {
                 <div className="details-grid">
                   <div className="detail-item">
                     <label>Title:</label>
-                    <p>{deliverable.title || 'N/A'}</p>
+                    <p>{deliverable.name || deliverable.title || 'N/A'}</p>
                   </div>
                   <div className="detail-item">
                     <label>Deadline:</label>
-                    <p>{deliverable.deadline || 'N/A'}</p>
+                    <p>{deliverable.dueDate || deliverable.deadline || 'N/A'}</p>
                   </div>
                   <div className="detail-item">
                     <label>Status:</label>
@@ -141,6 +171,55 @@ export const DeliverableSubmitPage = () => {
 
               <hr className="divider" />
 
+              {existingSubmission ? (
+                <div className="detail-section">
+                  <h3>✅ Submission Details</h3>
+                  
+                  <div className="submission-info">
+                    <div className="info-row">
+                      <label>File Name:</label>
+                      <p>{existingSubmission.fileName}</p>
+                    </div>
+                    <div className="info-row">
+                      <label>Submitted:</label>
+                      <p>{new Date(existingSubmission.createdAt).toLocaleString()}</p>
+                    </div>
+                    <div className="info-row">
+                      <label>Status:</label>
+                      <p>
+                        <span className={`status-badge status-${existingSubmission.status.toLowerCase()}`}>
+                          {existingSubmission.status}
+                        </span>
+                      </p>
+                    </div>
+                    <div className="info-row">
+                      <label>Version:</label>
+                      <p>v{existingSubmission.versionNumber}</p>
+                    </div>
+                    {existingSubmission.feedback && (
+                      <div className="info-row">
+                        <label>Feedback:</label>
+                        <p>{existingSubmission.feedback}</p>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="submission-actions">
+                    <button
+                      className="download-btn"
+                      onClick={() => downloadFile(existingSubmission.id, existingSubmission.fileName)}
+                    >
+                      📥 Download File
+                    </button>
+                    <button
+                      className="resubmit-btn"
+                      onClick={() => setExistingSubmission(null)}
+                    >
+                      📤 Submit New Version
+                    </button>
+                  </div>
+                </div>
+              ) : (
               <div className="detail-section">
                 <h3>📤 Upload File</h3>
                 
@@ -217,6 +296,7 @@ export const DeliverableSubmitPage = () => {
                   </button>
                 </form>
               </div>
+              )}
             </div>
           </div>
         </div>

@@ -1,0 +1,54 @@
+# Compiled files
+*.class
+target/
+build/
+out/
+
+# IDE files
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+logs/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Node modules
+node_modules/
+dist/
+.cache/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# File uploads (temporary test files)
+backend/uploads/
+uploads/
+
+# Maven
+.mvn/
+mvnw
+mvnw.cmd
+
+# Package files
+*.jar
+*.war
+*.ear
+*.zip
+*.tar.gz
+*.rar

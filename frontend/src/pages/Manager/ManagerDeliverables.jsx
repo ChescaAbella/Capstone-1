@@ -309,6 +309,13 @@ export const ManagerDeliverablesPage = () => {
 
                   <div className="card-actions">
                     <Button 
+                      variant="primary" 
+                      size="sm"
+                      onClick={() => navigate(`/manager/submissions/${deliverable.id}`)}
+                    >
+                      📋 View Submissions
+                    </Button>
+                    <Button 
                       variant="secondary" 
                       size="sm"
                       onClick={() => openProgressModal(deliverable)}

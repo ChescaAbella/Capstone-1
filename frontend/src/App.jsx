@@ -17,6 +17,7 @@ import AdminDashboard from './pages/Dashboard/AdminDashboard';
 import MemberDeliverablesPage from './pages/Member/Deliverables';
 import DeliverableSubmitPage from './pages/Member/DeliverableSubmit';
 import ManagerDeliverablesPage from './pages/Manager/ManagerDeliverables';
+import ManagerSubmissionsPage from './pages/Manager/ManagerSubmissions';
 import HistoryPage from './pages/Member/History';
 import GanttChartPage from './pages/Project/GanttChart';
 import MockUserPanel from './components/MockUserPanel';
@@ -156,6 +157,15 @@ function AppContent() {
         element={
           <ProtectedRoute requiredRole="MANAGER">
             <ManagerDeliverablesPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/manager/submissions/:deliverableId"
+        element={
+          <ProtectedRoute requiredRole="MANAGER">
+            <ManagerSubmissionsPage />
           </ProtectedRoute>
         }
       />
