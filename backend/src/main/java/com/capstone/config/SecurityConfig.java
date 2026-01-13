@@ -89,11 +89,20 @@ public class SecurityConfig {
         if (frontendUrl != null) {
             configuration.setAllowedOrigins(Arrays.asList(
                 "http://localhost:5173",
+                "http://localhost:5174",
                 frontendUrl
             ));
         } else {
-            configuration.setAllowedOrigins(List.of("http://localhost:5173"));
+            configuration.setAllowedOrigins(Arrays.asList(
+                "http://localhost:5173",
+                "http://localhost:5174"
+            ));
         }
+        
+        // Allow Vercel preview deployments
+        configuration.setAllowedOriginPatterns(List.of(
+            "https://*.vercel.app"
+        ));
         
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
