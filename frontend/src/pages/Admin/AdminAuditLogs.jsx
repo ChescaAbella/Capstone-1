@@ -8,6 +8,8 @@ import { Button } from '../../components/Button';
 import { Table } from '../../components/Table';
 import './AdminAuditLogs.css';
 
+const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
+
 const AdminAuditLogs = () => {
   const [auditLogs, setAuditLogs] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -33,7 +35,7 @@ const AdminAuditLogs = () => {
 
         console.log('Fetching audit logs with headers:', headers);
 
-        const response = await fetch('/api/admin/audit-logs/recent?limit=100', {
+        const response = await fetch(`${API_URL}/api/admin/audit-logs/recent?limit=100`, {
           headers
         });
 
@@ -73,7 +75,7 @@ const AdminAuditLogs = () => {
           'Content-Type': 'application/json'
         };
 
-        const response = await fetch('/api/admin/audit-logs/statistics', {
+        const response = await fetch(`${API_URL}/api/admin/audit-logs/statistics`, {
           headers
         });
 
@@ -101,7 +103,7 @@ const AdminAuditLogs = () => {
           'Content-Type': 'application/json'
         };
 
-        const response = await fetch('/api/admin/audit-logs/recent?limit=100', {
+        const response = await fetch(`${API_URL}/api/admin/audit-logs/recent?limit=100`, {
           headers
         });
 
@@ -121,7 +123,7 @@ const AdminAuditLogs = () => {
         'Content-Type': 'application/json'
       };
 
-      const response = await fetch(`/api/admin/audit-logs/search?query=${encodeURIComponent(searchQuery)}`, {
+      const response = await fetch(`${API_URL}/api/admin/audit-logs/search?query=${encodeURIComponent(searchQuery)}`, {
         headers
       });
 
@@ -146,7 +148,7 @@ const AdminAuditLogs = () => {
           'Content-Type': 'application/json'
         };
 
-        const response = await fetch('/api/admin/audit-logs/recent?limit=100', {
+        const response = await fetch(`${API_URL}/api/admin/audit-logs/recent?limit=100`, {
           headers
         });
 
@@ -164,7 +166,7 @@ const AdminAuditLogs = () => {
           'Content-Type': 'application/json'
         };
 
-        const response = await fetch(`/api/admin/audit-logs/status/${status === 'success'}`, {
+        const response = await fetch(`${API_URL}/api/admin/audit-logs/status/${status === 'success'}`, {
           headers
         });
 
