@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, useLocation, useParams } from 'react-router-dom';
 import { DashboardLayout } from '../../components/Layout';
+import { submitFile } from '../../services/submissionService';
 import './DeliverableSubmit.css';
 
 export const DeliverableSubmitPage = () => {
@@ -90,14 +91,9 @@ export const DeliverableSubmitPage = () => {
       setLoading(true);
       setError('');
       
-      // Mock submission - in real app, this would upload to backend
-      const formData = new FormData();
-      formData.append('deliverableId', id);
-      formData.append('file', file);
-
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
-
+      // Call real backend API
+      const result = await submitFile(id, file);
+      
       setSuccess('✅ File submitted successfully!');
       setFile(null);
       setFileName('');
@@ -107,19 +103,7 @@ export const DeliverableSubmitPage = () => {
         navigate('/member/deliverables');
       }, 2000);
     } catch (err) {
-      setError('Failed to submit file. Please try again.');
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <DashboardLayout>
-      <div className="deliverable-submit-page">
-        <div className="submit-header">
-          <button className="back-btn" onClick={handleGoBack}>
-            ← Back to Deliverables
+      setError('Failed to submit file: ' + err.message);
           </button>
           <h1>{deliverable.title || 'Submit Deliverable'}</h1>
         </div>
