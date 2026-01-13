@@ -29,16 +29,17 @@ public class Submission {
     @Column(name = "submitted_by", nullable = false)
     private String submittedBy;
     
-    @Column(name = "file_name", nullable = false)
+    @Column(name = "file_name", nullable = false, length = 512)
     private String fileName;
     
-    @Column(name = "file_path", nullable = false)
-    private String filePath;
+    @Column(name = "file_data", nullable = false)
+    @org.hibernate.annotations.JdbcTypeCode(java.sql.Types.BINARY)
+    private byte[] fileData;
     
     @Column(name = "file_size")
     private Long fileSize;
     
-    @Column(name = "file_type")
+    @Column(name = "file_type", length = 512)
     private String fileType;
     
     @Column(name = "google_drive_file_id")

@@ -1,6 +1,8 @@
 package com.capstone.controller;
 
 import com.capstone.model.User;
+import com.capstone.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -14,9 +16,17 @@ import java.util.Map;
 @CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
 public class LeaderController {
 
+    @Autowired
+    private UserService userService;
+
     @GetMapping("/dashboard")
     @PreAuthorize("hasRole('LEADER')")
-    public ResponseEntity<?> getLeaderDashboard(@AuthenticationPrincipal User user) {
+    public ResponseEntity<?> getLeaderDashboard(@AuthenticationPrincipal String email) {
+        if (email == null) {
+            return ResponseEntity.status(401).body("Unauthorized: No email found");
+        }
+        User user = userService.getUserByEmail(email);
+        
         Map<String, Object> response = new HashMap<>();
         response.put("message", "Welcome to Leader Dashboard");
         response.put("user", user.getName());
@@ -34,7 +44,12 @@ public class LeaderController {
 
     @GetMapping("/team")
     @PreAuthorize("hasRole('LEADER')")
-    public ResponseEntity<?> getTeamInfo(@AuthenticationPrincipal User user) {
+    public ResponseEntity<?> getTeamInfo(@AuthenticationPrincipal String email) {
+        if (email == null) {
+            return ResponseEntity.status(401).body("Unauthorized: No email found");
+        }
+        User user = userService.getUserByEmail(email);
+        
         Map<String, Object> teamInfo = new HashMap<>();
         teamInfo.put("leaderId", user.getId());
         teamInfo.put("leaderName", user.getName());

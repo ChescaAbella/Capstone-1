@@ -22,12 +22,13 @@ public class ProfileController {
      * Get current user's profile
      */
     @GetMapping
-    public ResponseEntity<?> getProfile(@AuthenticationPrincipal User user) {
-        if (user == null) {
+    public ResponseEntity<?> getProfile(@AuthenticationPrincipal String email) {
+        if (email == null) {
             return ResponseEntity.status(401)
                     .body(new ApiResponse(false, "Unauthorized", null));
         }
 
+        User user = userService.getUserByEmail(email);
         UserInfo userInfo = new UserInfo(
                 user.getId(),
                 user.getEmail(),
@@ -49,15 +50,16 @@ public class ProfileController {
      */
     @PutMapping
     public ResponseEntity<?> updateProfile(
-            @AuthenticationPrincipal User user,
+            @AuthenticationPrincipal String email,
             @RequestBody ProfileUpdateRequest request) {
         
-        if (user == null) {
+        if (email == null) {
             return ResponseEntity.status(401)
                     .body(new ApiResponse(false, "Unauthorized", null));
         }
 
         try {
+            User user = userService.getUserByEmail(email);
             User updatedUser = userService.updateProfile(user.getId(), request);
             
             UserInfo userInfo = new UserInfo(

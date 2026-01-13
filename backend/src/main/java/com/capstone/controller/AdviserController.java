@@ -1,6 +1,8 @@
 package com.capstone.controller;
 
 import com.capstone.model.User;
+import com.capstone.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -14,9 +16,17 @@ import java.util.Map;
 @CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
 public class AdviserController {
 
+    @Autowired
+    private UserService userService;
+
     @GetMapping("/dashboard")
     @PreAuthorize("hasRole('ADVISER')")
-    public ResponseEntity<?> getAdviserDashboard(@AuthenticationPrincipal User user) {
+    public ResponseEntity<?> getAdviserDashboard(@AuthenticationPrincipal String email) {
+        if (email == null) {
+            return ResponseEntity.status(401).body("Unauthorized: No email found");
+        }
+        User user = userService.getUserByEmail(email);
+        
         Map<String, Object> response = new HashMap<>();
         response.put("message", "Welcome to Adviser Dashboard");
         response.put("user", user.getName());
@@ -34,7 +44,12 @@ public class AdviserController {
 
     @GetMapping("/teams")
     @PreAuthorize("hasRole('ADVISER')")
-    public ResponseEntity<?> getAllTeams(@AuthenticationPrincipal User user) {
+    public ResponseEntity<?> getAllTeams(@AuthenticationPrincipal String email) {
+        if (email == null) {
+            return ResponseEntity.status(401).body("Unauthorized: No email found");
+        }
+        User user = userService.getUserByEmail(email);
+        
         Map<String, Object> teamsInfo = new HashMap<>();
         teamsInfo.put("adviserId", user.getId());
         teamsInfo.put("adviserName", user.getName());
@@ -46,7 +61,12 @@ public class AdviserController {
 
     @GetMapping("/students")
     @PreAuthorize("hasRole('ADVISER')")
-    public ResponseEntity<?> getAllStudents(@AuthenticationPrincipal User user) {
+    public ResponseEntity<?> getAllStudents(@AuthenticationPrincipal String email) {
+        if (email == null) {
+            return ResponseEntity.status(401).body("Unauthorized: No email found");
+        }
+        User user = userService.getUserByEmail(email);
+        
         Map<String, Object> studentsInfo = new HashMap<>();
         studentsInfo.put("totalStudents", 40);
         studentsInfo.put("activeStudents", 38);

@@ -123,6 +123,11 @@ public class UserService {
         return userRepository.findByEmail(email);
     }
 
+    public User getUserByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
+    }
+
     @Transactional
     public User updateUserRole(String email, User.Role role) {
         User user = userRepository.findByEmail(email)

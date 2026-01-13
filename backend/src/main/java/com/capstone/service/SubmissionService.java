@@ -8,17 +8,12 @@ import com.capstone.repository.DeliverableRepository;
 import com.capstone.repository.SubmissionRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
@@ -34,9 +29,6 @@ public class SubmissionService {
     
     @Autowired
     private DeliverableRepository deliverableRepository;
-    
-    @Value("${upload.dir:uploads}")
-    private String uploadDir;
     
     /**
      * Submit a file for a deliverable
@@ -61,21 +53,17 @@ public class SubmissionService {
                     });
         }
         
-        // Save file to disk
-        String fileName = generateFileName(file.getOriginalFilename());
-        Path uploadPath = Paths.get(uploadDir, "submissions", deliverableId.toString());
-        Files.createDirectories(uploadPath);
-        Path filePath = uploadPath.resolve(fileName);
-        Files.write(filePath, file.getBytes());
+        // Store file content directly in database
+        byte[] fileData = file.getBytes();
         
-        log.info("File saved to: {}", filePath);
+        log.info("Storing file data in database: {} bytes", fileData.length);
         
-        // Create submission record
+        // Create submission record with file data
         Submission submission = Submission.builder()
                 .deliverable(deliverable)
                 .submittedBy(userId)
                 .fileName(file.getOriginalFilename())
-                .filePath(filePath.toString())
+                .fileData(fileData)
                 .fileSize(file.getSize())
                 .fileType(file.getContentType())
                 .versionNumber(nextVersion)
@@ -182,11 +170,12 @@ public class SubmissionService {
     }
     
     /**
-     * Generate unique file name
+     * Download file content
      */
-    private String generateFileName(String originalFileName) {
-        String extension = originalFileName.substring(originalFileName.lastIndexOf("."));
-        return UUID.randomUUID() + extension;
+    public byte[] downloadFile(Long submissionId) {
+        Submission submission = submissionRepository.findById(submissionId)
+                .orElseThrow(() -> new ResourceNotFoundException("Submission not found"));
+        return submission.getFileData();
     }
     
     /**

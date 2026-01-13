@@ -124,9 +124,14 @@ public class AuthController {
     // ===== EXISTING ENDPOINTS =====
 
     @GetMapping("/user")
-    public ResponseEntity<?> getCurrentUser(@AuthenticationPrincipal User user) {
-        if (user == null) {
+    public ResponseEntity<?> getCurrentUser(@AuthenticationPrincipal String email) {
+        if (email == null) {
             return ResponseEntity.status(401).body(new MessageResponse("Unauthorized"));
+        }
+
+        User user = userService.getUserByEmail(email);
+        if (user == null) {
+            return ResponseEntity.status(401).body(new MessageResponse("User not found"));
         }
 
         UserInfo userInfo = new UserInfo(
@@ -167,8 +172,9 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<?> logoutUser(@AuthenticationPrincipal User user) {
-        if (user != null) {
+    public ResponseEntity<?> logoutUser(@AuthenticationPrincipal String email) {
+        if (email != null) {
+            User user = userService.getUserByEmail(email);
             refreshTokenService.deleteByUserId(user.getId());
         }
         return ResponseEntity.ok(new MessageResponse("Logged out successfully!"));
@@ -229,16 +235,16 @@ public class AuthController {
     }
 
     @PostMapping("/resend-verification")
-    public ResponseEntity<?> resendVerification(@RequestParam(required = false) String email,
-                                                 @AuthenticationPrincipal User user) {
+    public ResponseEntity<?> resendVerification(@RequestParam(required = false) String emailParam,
+                                                 @AuthenticationPrincipal String email) {
         try {
             User targetUser = null;
             
             // Use authenticated user if available, otherwise use email parameter
-            if (user != null) {
-                targetUser = user;
-            } else if (email != null && !email.isEmpty()) {
-                targetUser = userService.findByEmail(email)
+            if (email != null) {
+                targetUser = userService.getUserByEmail(email);
+            } else if (emailParam != null && !emailParam.isEmpty()) {
+                targetUser = userService.findByEmail(emailParam)
                         .orElseThrow(() -> new RuntimeException("User not found"));
             } else {
                 return ResponseEntity.badRequest()
@@ -260,11 +266,12 @@ public class AuthController {
     }
 
     @GetMapping("/verification-status")
-    public ResponseEntity<?> getVerificationStatus(@AuthenticationPrincipal User user) {
-        if (user == null) {
+    public ResponseEntity<?> getVerificationStatus(@AuthenticationPrincipal String email) {
+        if (email == null) {
             return ResponseEntity.status(401).body(new MessageResponse("Unauthorized"));
         }
 
+        User user = userService.getUserByEmail(email);
         return ResponseEntity.ok(new MessageResponse(
                 user.isEmailVerified() ? "Email verified" : "Email not verified"
         ));

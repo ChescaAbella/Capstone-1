@@ -4,13 +4,17 @@ import com.capstone.dto.SubmissionDTO;
 import com.capstone.service.SubmissionService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.security.Principal;
 import java.util.List;
 
@@ -46,8 +50,13 @@ public class SubmissionController {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<SubmissionDTO> getLatestSubmission(@PathVariable Long deliverableId) {
         log.info("Getting latest submission for deliverable: {}", deliverableId);
-        SubmissionDTO submission = submissionService.getLatestSubmission(deliverableId);
-        return new ResponseEntity<>(submission, HttpStatus.OK);
+        try {
+            SubmissionDTO submission = submissionService.getLatestSubmission(deliverableId);
+            return new ResponseEntity<>(submission, HttpStatus.OK);
+        } catch (Exception e) {
+            // No submission found - return 404
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
     
     /**
@@ -95,5 +104,27 @@ public class SubmissionController {
         log.info("Getting submissions for user: {}", principal.getName());
         List<SubmissionDTO> submissions = submissionService.getUserSubmissions(principal.getName());
         return new ResponseEntity<>(submissions, HttpStatus.OK);
+    }
+    
+    /**
+     * Download file for a submission
+     */
+    @GetMapping("/{id}/download")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<byte[]> downloadFile(@PathVariable Long id) {
+        log.info("Downloading file for submission: {}", id);
+        
+        SubmissionDTO submission = submissionService.getSubmissionById(id);
+        byte[] fileData = submissionService.downloadFile(id);
+        
+        String encodedFileName = URLEncoder.encode(submission.getFileName(), StandardCharsets.UTF_8)
+                .replace("+", "%20");
+        
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.parseMediaType(submission.getFileType()));
+        headers.setContentDispositionFormData("attachment", submission.getFileName());
+        headers.set("Content-Disposition", "attachment; filename*=UTF-8''" + encodedFileName);
+        
+        return new ResponseEntity<>(fileData, headers, HttpStatus.OK);
     }
 }

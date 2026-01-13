@@ -38,7 +38,7 @@ public class DeliverableController {
      * Get deliverables by project (Timeline View)
      */
     @GetMapping("/project/{projectId}")
-    @PreAuthorize("hasAnyRole('USER', 'MANAGER', 'ADMIN')")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<DeliverableDTO>> getDeliverablesByProject(@PathVariable Long projectId) {
         log.info("Getting deliverables for project: {}", projectId);
         List<DeliverableDTO> deliverables = deliverableService.getDeliverablesByProject(projectId);
@@ -49,7 +49,7 @@ public class DeliverableController {
      * Get deliverables by team
      */
     @GetMapping("/team/{teamId}")
-    @PreAuthorize("hasAnyRole('USER', 'MANAGER', 'ADMIN')")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<DeliverableDTO>> getDeliverablesByTeam(@PathVariable Long teamId) {
         log.info("Getting deliverables for team: {}", teamId);
         List<DeliverableDTO> deliverables = deliverableService.getDeliverablesByTeam(teamId);
@@ -60,7 +60,7 @@ public class DeliverableController {
      * Get active deliverables for team
      */
     @GetMapping("/team/{teamId}/active")
-    @PreAuthorize("hasAnyRole('USER', 'MANAGER', 'ADMIN')")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<DeliverableDTO>> getActiveDeliverablesByTeam(@PathVariable Long teamId) {
         log.info("Getting active deliverables for team: {}", teamId);
         List<DeliverableDTO> deliverables = deliverableService.getActiveDeliverablesByTeam(teamId);
@@ -71,7 +71,7 @@ public class DeliverableController {
      * Get deliverable by ID
      */
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('USER', 'MANAGER', 'ADMIN')")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<DeliverableDTO> getDeliverableById(@PathVariable Long id) {
         DeliverableDTO deliverable = deliverableService.getDeliverableById(id);
         return new ResponseEntity<>(deliverable, HttpStatus.OK);
