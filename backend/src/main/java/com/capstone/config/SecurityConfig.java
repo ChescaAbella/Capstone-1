@@ -85,27 +85,14 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         
-        String frontendUrl = System.getenv("APP_FRONTEND_URL");
-        if (frontendUrl != null) {
-            configuration.setAllowedOrigins(Arrays.asList(
-                "http://localhost:5173",
-                "http://localhost:5174",
-                frontendUrl
-            ));
-        } else {
-            configuration.setAllowedOrigins(Arrays.asList(
-                "http://localhost:5173",
-                "http://localhost:5174"
-            ));
-        }
-        
-        // Allow Vercel preview deployments
-        configuration.setAllowedOriginPatterns(List.of(
+        // Allow localhost for development and Vercel for production
+        configuration.setAllowedOriginPatterns(Arrays.asList(
+            "http://localhost:*",
             "https://*.vercel.app"
         ));
         
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("*"));
+        configuration.setAllowedHeaders(Arrays.asList("Content-Type", "Authorization", "X-Requested-With"));
         configuration.setAllowCredentials(true);
         
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

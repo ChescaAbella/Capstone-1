@@ -116,6 +116,12 @@ const ManagerDashboard = () => {
           </Button>
           <Button
             variant="secondary"
+            onClick={() => navigate('/project/gantt')}
+          >
+            📊 View Timeline
+          </Button>
+          <Button
+            variant="secondary"
             onClick={() => setShowCreateAssignment(true)}
           >
             + Create New Assignment

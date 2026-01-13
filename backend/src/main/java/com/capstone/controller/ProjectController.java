@@ -17,7 +17,6 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequestMapping("/api/v1/projects")
-@CrossOrigin(origins = "*", maxAge = 3600)
 public class ProjectController {
 
     @Autowired

@@ -91,7 +91,10 @@ export const updateDeliverableProgress = async (id, progressData) => {
   const response = await fetch(`${API_URL}/api/v1/deliverables/${id}/progress`, {
     method: 'PUT',
     headers: getAuthHeader(),
-    body: JSON.stringify(progressData)
+    body: JSON.stringify({
+      progressPercentage: progressData.progress,
+      notes: progressData.notes
+    })
   });
   return handleResponse(response);
 };

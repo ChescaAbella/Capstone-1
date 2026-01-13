@@ -47,6 +47,7 @@ export const getAllTeams = async () => {
  */
 export const getActiveTeams = async () => {
   const response = await fetch(`${API_URL}/api/v1/teams/active`, {
+    credentials: 'include',
     headers: getAuthHeader()
   });
   return handleResponse(response);

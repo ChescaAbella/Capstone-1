@@ -17,7 +17,6 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequestMapping("/api/v1/teams")
-@CrossOrigin(origins = "*", maxAge = 3600)
 public class TeamController {
 
     @Autowired
@@ -50,7 +49,7 @@ public class TeamController {
      * Get active teams
      */
     @GetMapping("/active")
-    @PreAuthorize("hasAnyRole('USER', 'MANAGER', 'ADMIN')")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<TeamDTO>> getActiveTeams() {
         List<TeamDTO> teams = teamService.getActiveTeams();
         return new ResponseEntity<>(teams, HttpStatus.OK);

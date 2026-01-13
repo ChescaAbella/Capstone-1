@@ -16,7 +16,6 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequestMapping("/api/v1/deliverables")
-@CrossOrigin(origins = "*", maxAge = 3600)
 public class DeliverableController {
 
     @Autowired

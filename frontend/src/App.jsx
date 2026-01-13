@@ -18,6 +18,7 @@ import MemberDeliverablesPage from './pages/Member/Deliverables';
 import DeliverableSubmitPage from './pages/Member/DeliverableSubmit';
 import ManagerDeliverablesPage from './pages/Manager/ManagerDeliverables';
 import HistoryPage from './pages/Member/History';
+import GanttChartPage from './pages/Project/GanttChart';
 import MockUserPanel from './components/MockUserPanel';
 import './styles/global.css';
 
@@ -155,6 +156,15 @@ function AppContent() {
         element={
           <ProtectedRoute requiredRole="MANAGER">
             <ManagerDeliverablesPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/project/gantt"
+        element={
+          <ProtectedRoute requiredRole="MANAGER">
+            <GanttChartPage />
           </ProtectedRoute>
         }
       />
