@@ -1,7 +1,8 @@
 .alert {
   padding: var(--spacing-md) var(--spacing-lg);
   border-radius: var(--border-radius);
-  display: flex;
+  /*display: flex;*/
+  display: flex !important;/*change*/
   justify-content: space-between;
   align-items: flex-start;
   gap: var(--spacing-md);
