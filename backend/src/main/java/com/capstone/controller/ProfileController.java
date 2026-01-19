@@ -9,9 +9,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+//add
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.PathVariable;
+
 
 @RestController
-@RequestMapping("/api/profile")
+@RequestMapping("/api/users")
 @CrossOrigin(origins = {"http://localhost:5173", "https://capstonecg-1.vercel.app"}, allowCredentials = "true")
 public class ProfileController {
 
@@ -21,7 +27,7 @@ public class ProfileController {
     /**
      * Get current user's profile
      */
-    @GetMapping
+    @GetMapping("users/{id}")
     public ResponseEntity<?> getProfile(@AuthenticationPrincipal String email) {
         if (email == null) {
             return ResponseEntity.status(401)
@@ -48,7 +54,7 @@ public class ProfileController {
     /**
      * Update current user's profile
      */
-    @PutMapping
+    @PutMapping("users/{id}")
     public ResponseEntity<?> updateProfile(
             @AuthenticationPrincipal String email,
             @RequestBody ProfileUpdateRequest request) {
@@ -81,4 +87,36 @@ public class ProfileController {
                     .body(new ApiResponse(false, "Failed to update profile: " + e.getMessage(), null));
         }
     }
+
+    @PutMapping("users/{id}/photo")
+    public ResponseEntity<?> updateUserPhoto(@PathVariable Long id, @RequestParam("photo") MultipartFile photo) {
+        try{
+            User user = userService.updateUserPhoto(id, photo);
+            UserInfo userInfo = new UserInfo(
+                 user.getId(),
+                 user.getEmail(),
+                    user.getName(),
+                    user.getPicture(),
+                    user.getRole().name(),
+                    user.getPhoneNumber(),
+                    user.getDepartment(),
+                    user.getBio(),
+                    user.getStudentId(),
+                    user.getYearLevel()
+            );
+            return ResponseEntity.ok(new ApiResponse(true, "Photo update", userInfo))
+        }catch(Exception e){
+            return ResponseEntity.badRequest().body(new ApiResponse(false, e.getMessage(), null));
+        }
+    }
+    @PutMapping("users/{id}/deactivate")
+    public ResponseEntity<?> deactitaveUser(@PathVariable Long id){
+        try {
+            userService.deactivateUser(id);
+            return ResponseEntity.ok(new ApiResponse(true, "Account deactivated"), null));
+        }catch (Exception e){
+            return ResponseEntity.badRequest().body(new ApiResponse(false, e.getMessage(), null))
+        }
+    }
+    
 }

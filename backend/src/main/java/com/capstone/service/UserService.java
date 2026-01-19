@@ -12,6 +12,12 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+//new add
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import org.springframework.web.multipart.MultipartFile;
+
 @Service
 public class UserService {
 
@@ -177,6 +183,21 @@ public class UserService {
             user.setPicture(request.getPicture());
         }
         
+        return userRepository.save(user);
+    }
+    //new add
+    public User updateUserPhoto(Long id, MultipartFile photo){
+        User user = getUserById(id);
+
+        String fileName = "photo_" + id + "_" + System.currentTimeMillis() + ".jpg";
+        Path uploadPath = Paths.get("uploads/");
+        if(!Files.exists(uploadPath)){
+            Files.createDirectories(uploadPath);
+        }
+        path filePath = uploadPath.resolve(fileName);
+        photo.transferTo(filePath);
+        
+        user.setPicture("/uploads/" + fileName);
         return userRepository.save(user);
     }
 }
