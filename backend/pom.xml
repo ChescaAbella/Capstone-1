@@ -47,6 +47,24 @@
 			<artifactId>spring-boot-starter-webmvc</artifactId>
 		</dependency>
 
+	<!-- Apache POI for Excel file handling -->
+	<dependency>
+		<groupId>org.apache.poi</groupId>
+		<artifactId>poi</artifactId>
+		<version>5.1.0</version>
+	</dependency>
+	<dependency>
+		<groupId>org.apache.poi</groupId>
+		<artifactId>poi-ooxml</artifactId>
+		<version>5.1.0</version>
+	</dependency>
+
+	<!-- Jackson for JSON processing -->
+	<dependency>
+		<groupId>com.fasterxml.jackson.core</groupId>
+		<artifactId>jackson-databind</artifactId>
+	</dependency>
+
 	<!-- Lombok for reducing boilerplate -->
 	<dependency>
 		<groupId>org.projectlombok</groupId>

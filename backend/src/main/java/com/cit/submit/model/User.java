@@ -69,7 +69,7 @@ public class User {
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         if (role == null) {
-            role = UserRole.MEMBER;
+            role = UserRole.STUDENT;
         }
         if (authProvider == null) {
             authProvider = "email";

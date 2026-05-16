@@ -44,14 +44,14 @@ public class UserService {
         }
 
         // Update optional fields based on role
-        if (user.getRole() == UserRole.MEMBER) {
+        if (user.getRole() == UserRole.STUDENT) {
             if (request.getStudentId() != null) {
                 user.setStudentId(request.getStudentId());
             }
             if (request.getTeamCode() != null) {
                 user.setTeamCode(request.getTeamCode());
             }
-        } else if (user.getRole() == UserRole.MANAGER || user.getRole() == UserRole.ADMIN) {
+        } else if (user.getRole() == UserRole.TEACHER || user.getRole() == UserRole.ADMIN) {
             if (request.getDepartment() != null) {
                 user.setDepartment(request.getDepartment());
             }

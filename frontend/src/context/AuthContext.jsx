@@ -1,14 +1,14 @@
 import { createContext, useState, useContext, useEffect } from 'react';
-import { mockUser, mockManagerUser, mockAdminUser } from '../services/mockApi';
+import { mockUser, mockTeacherUser, mockAdminUser } from '../services/mockApi';
 import { verifyGoogleToken } from '../services/googleOAuth';
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [token, setToken] = useState(null);
+  const [user, setUser] = useState(mockTeacherUser); // Default to teacher for dev
+  const [isAuthenticated, setIsAuthenticated] = useState(true); // Start authenticated for dev
+  const [loading, setLoading] = useState(false);
+  const [token, setToken] = useState('dev-token');
 
   // Initialize from localStorage on mount
   useEffect(() => {
@@ -25,7 +25,6 @@ export const AuthProvider = ({ children }) => {
         console.error('Failed to parse saved user:', e);
       }
     }
-    setLoading(false);
   }, []);
 
   const login = (emailOrToken, password, userData = null) => {
@@ -37,8 +36,8 @@ export const AuthProvider = ({ children }) => {
       user = userData;
     } else {
       // Traditional login - select user based on email
-      if (emailOrToken.includes('professor') || emailOrToken.includes('manager')) {
-        user = mockManagerUser;
+      if (emailOrToken.includes('professor') || emailOrToken.includes('teacher')) {
+        user = mockTeacherUser;
       } else if (emailOrToken.includes('admin')) {
         user = mockAdminUser;
       } else {
@@ -85,8 +84,8 @@ export const AuthProvider = ({ children }) => {
   // For testing: set a specific mock user
   const setMockUser = (userType) => {
     let userData;
-    if (userType === 'manager') {
-      userData = mockManagerUser;
+    if (userType === 'teacher') {
+      userData = mockTeacherUser;
     } else if (userType === 'admin') {
       userData = mockAdminUser;
     } else {

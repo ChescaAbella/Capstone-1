@@ -19,6 +19,9 @@ public class AuthService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private StudentImportService studentImportService;
+
     public LoginResponse login(String email, String password) throws Exception {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new Exception("User not found"));
@@ -62,7 +65,7 @@ public class AuthService {
         user.setName(request.getName());
         user.setStudentId(request.getStudentId());
         user.setTeamCode(request.getTeamCode());
-        user.setRole(UserRole.MEMBER); // Default role
+        user.setRole(UserRole.STUDENT); // Default role
         user.setEmailVerified(false);
         user.setAuthProvider("email");
         user.setAccountStatus("PENDING");
@@ -95,7 +98,7 @@ public class AuthService {
             user.setEmail(email);
             user.setName(name);
             user.setAuthProvider(oauthProvider);
-            user.setRole(UserRole.MEMBER); // Default role
+            user.setRole(UserRole.STUDENT); // Default role
             user.setEmailVerified(true); // OAuth verified automatically
             user.setAccountStatus("ACTIVE");
             user = userRepository.save(user);
@@ -157,10 +160,25 @@ public class AuthService {
                 user.setName(name);
                 user.setAuthProvider("google");
                 user.setPictureUrl(picture);
-                user.setRole(UserRole.MEMBER);
+                user.setRole(UserRole.STUDENT);
                 user.setEmailVerified(true);
                 user.setAccountStatus("ACTIVE");
                 user.setPasswordHash(""); // OAuth users don't have password
+                
+                // Check if user's email is in imported students
+                try {
+                    com.cit.submit.dto.StudentImportResponse studentImport = studentImportService.getStudentByEmail(email);
+                    if (studentImport != null) {
+                        user.setTeamCode(studentImport.getTeamCode());
+                        user.setStudentId(studentImport.getStudentId());
+                        user.setRole(UserRole.STUDENT);
+                        // Mark student as registered
+                        studentImportService.markStudentAsRegistered(email);
+                    }
+                } catch (Exception e) {
+                    // Student not in import list - that's OK
+                }
+                
                 user = userRepository.save(user);
             } else {
                 // Update existing user

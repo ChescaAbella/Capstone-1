@@ -17,16 +17,16 @@ const MockUserPanel = () => {
       <div className="mock-user-title">🧪 Mock User (Dev Only)</div>
       <div className="mock-user-buttons">
         <button 
-          className={`mock-btn ${user?.role === 'MEMBER' ? 'active' : ''}`}
-          onClick={() => handleRoleChange('member')}
+          className={`mock-btn ${user?.role === 'STUDENT' ? 'active' : ''}`}
+          onClick={() => handleRoleChange('student')}
         >
-          Member
+          Student
         </button>
         <button 
-          className={`mock-btn ${user?.role === 'MANAGER' ? 'active' : ''}`}
-          onClick={() => handleRoleChange('manager')}
+          className={`mock-btn ${user?.role === 'TEACHER' ? 'active' : ''}`}
+          onClick={() => handleRoleChange('teacher')}
         >
-          Manager
+          Teacher
         </button>
         <button 
           className={`mock-btn ${user?.role === 'ADMIN' ? 'active' : ''}`}

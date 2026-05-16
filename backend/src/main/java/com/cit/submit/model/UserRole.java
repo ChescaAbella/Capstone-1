@@ -1,7 +1,7 @@
 package com.cit.submit.model;
 
 public enum UserRole {
-    MEMBER,
-    MANAGER,
+    STUDENT,
+    TEACHER,
     ADMIN
 }

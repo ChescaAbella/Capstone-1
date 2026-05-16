@@ -234,7 +234,7 @@ const AllUsersPage = () => {
               <span className="search-icon">🔍</span>
               <input
                 type="text"
-                placeholder="Search by name, email, or member ID..."
+                placeholder="Search by name, email, or student ID..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="search-input"

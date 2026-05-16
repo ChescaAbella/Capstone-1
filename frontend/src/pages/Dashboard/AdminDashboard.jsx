@@ -14,10 +14,10 @@ const AdminDashboard = () => {
   const [showAddUser, setShowAddUser] = useState(false);
 
   const users = [
-    { id: 1, name: 'John Doe', email: 'john@example.com', role: 'MEMBER', status: 'active', joinDate: '2025-01-01' },
-    { id: 2, name: 'Jane Smith', email: 'jane@example.com', role: 'MANAGER', status: 'active', joinDate: '2025-01-02' },
+    { id: 1, name: 'John Doe', email: 'john@example.com', role: 'STUDENT', status: 'active', joinDate: '2025-01-01' },
+    { id: 2, name: 'Jane Smith', email: 'jane@example.com', role: 'TEACHER', status: 'active', joinDate: '2025-01-02' },
     { id: 3, name: 'Admin User', email: 'admin@example.com', role: 'ADMIN', status: 'active', joinDate: '2024-12-01' },
-    { id: 4, name: 'Bob Johnson', email: 'bob@example.com', role: 'MEMBER', status: 'inactive', joinDate: '2025-01-03' },
+    { id: 4, name: 'Bob Johnson', email: 'bob@example.com', role: 'STUDENT', status: 'inactive', joinDate: '2025-01-03' },
   ];
 
   const systemStats = [
@@ -42,7 +42,7 @@ const AdminDashboard = () => {
       label: 'Role',
       width: '15%',
       render: (role) => (
-        <Badge variant={role === 'ADMIN' ? 'danger' : role === 'MANAGER' ? 'warning' : 'info'}>
+        <Badge variant={role === 'ADMIN' ? 'danger' : role === 'TEACHER' ? 'warning' : 'info'}>
           {role}
         </Badge>
       ),
@@ -132,8 +132,8 @@ const AdminDashboard = () => {
           <Select
             label="Role"
             options={[
-              { value: 'MEMBER', label: 'Member' },
-              { value: 'MANAGER', label: 'Manager' },
+              { value: 'STUDENT', label: 'Student' },
+              { value: 'TEACHER', label: 'Teacher' },
               { value: 'ADMIN', label: 'Admin' },
             ]}
             fullWidth

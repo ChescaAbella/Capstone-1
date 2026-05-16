@@ -18,4 +18,5 @@ export { Sidebar } from './Sidebar';
 export { Alert } from './Alert';
 export { Badge } from './Badge';
 export { Modal } from './Modal';
+export { StudentImportUpload } from './StudentImportUpload';
 export { Table } from './Table';

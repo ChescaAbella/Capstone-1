@@ -18,15 +18,16 @@ const Sidebar = ({ role }) => {
 
   // Navigation items based on role
   const navItems = {
-    MEMBER: [
+    STUDENT: [
       { icon: '📊', label: 'Dashboard', path: '/dashboard', action: () => navigate('/dashboard') },
-      { icon: '�', label: 'Deliverables', path: '/member/deliverables', action: () => navigate('/member/deliverables') },
-      { icon: '📜', label: 'History', path: '/member/history', action: () => navigate('/member/history') },
+      { icon: '�', label: 'Assignments', path: '/student/assignments', action: () => navigate('/student/assignments') },
+      { icon: '�📋', label: 'Deliverables', path: '/student/deliverables', action: () => navigate('/student/deliverables') },
+      { icon: '📜', label: 'History', path: '/student/history', action: () => navigate('/student/history') },
     ],
-    MANAGER: [
+    TEACHER: [
       { icon: '📊', label: 'Dashboard', path: '/dashboard', action: () => navigate('/dashboard') },
       { icon: '📋', label: 'Deliverables', path: '/deliverables', action: () => navigate('/deliverables') },
-      { icon: '👥', label: 'Team Members', path: '/team', action: () => navigate('/team') },
+      { icon: '👥', label: 'Class Members', path: '/team', action: () => navigate('/team') },
       { icon: '📈', label: 'Analytics', path: '/analytics', action: () => navigate('/analytics') },
       { icon: '⚙️', label: 'Settings', path: '/settings', action: () => navigate('/settings') },
     ],
@@ -39,7 +40,7 @@ const Sidebar = ({ role }) => {
     ],
   };
 
-  const currentNavItems = navItems[role] || navItems.MEMBER;
+  const currentNavItems = navItems[role] || navItems.STUDENT;
 
   return (
     <aside className="sidebar">

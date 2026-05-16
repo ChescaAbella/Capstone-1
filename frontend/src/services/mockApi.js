@@ -3,8 +3,8 @@ export const mockUser = {
   id: 1,
   email: 'student@school.edu',
   name: 'John Student',
-  role: 'MEMBER',
-  memberId: 'STU-2025-001',
+  role: 'STUDENT',
+  studentId: 'STU-2025-001',
   teamCode: 'TEAM-A',
   pictureUrl: 'https://via.placeholder.com/150',
   emailVerified: true,
@@ -14,12 +14,12 @@ export const mockUser = {
   createdAt: '2025-01-15T10:30:00',
 };
 
-export const mockManagerUser = {
+export const mockTeacherUser = {
   id: 2,
   email: 'professor@school.edu',
   name: 'Dr. Jane Professor',
-  role: 'MANAGER',
-  managerId: 'FAC-2025-042',
+  role: 'TEACHER',
+  teacherId: 'FAC-2025-042',
   facultyId: 'FAC-2025-042',
   department: 'Computer Science',
   pictureUrl: 'https://via.placeholder.com/150',
@@ -56,8 +56,8 @@ export const mockApiCall = (endpoint, method = 'GET', data = null) => {
         // Mock login - return different user based on email
         if (data?.email?.includes('professor')) {
           resolve({
-            token: 'mock-jwt-token-manager',
-            user: mockManagerUser,
+            token: 'mock-jwt-token-teacher',
+            user: mockTeacherUser,
           });
         } else if (data?.email?.includes('admin')) {
           resolve({

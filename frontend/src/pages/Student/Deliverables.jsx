@@ -4,7 +4,7 @@ import DashboardLayout from '../Dashboard/DashboardLayout';
 import { useAuth } from '../../context/AuthContext';
 import './Deliverables.css';
 
-const MemberDeliverablesPage = () => {
+const StudentDeliverablesPage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [deliverables, setDeliverables] = useState([]);
@@ -66,7 +66,7 @@ const MemberDeliverablesPage = () => {
   };
 
   const handleCardClick = (deliverable) => {
-    navigate(`/member/deliverables/${deliverable.id}`, { state: { deliverable } });
+    navigate(`/student/deliverables/${deliverable.id}`, { state: { deliverable } });
   };
 
   const getStatusColor = (status) => {
@@ -201,4 +201,4 @@ const MemberDeliverablesPage = () => {
   );
 };
 
-export default MemberDeliverablesPage;
+export default StudentDeliverablesPage;

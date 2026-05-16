@@ -6,12 +6,13 @@ import { RegisterPage } from './pages/RegisterPage';
 import { VerificationPage } from './pages/VerificationPage';
 import { ProfilePage } from './pages/Profile/ProfilePage';
 import { AdminPanel } from './pages/AdminPanel';
-import MemberDashboard from './pages/Dashboard/MemberDashboard';
-import ManagerDashboard from './pages/Dashboard/ManagerDashboard';
+import StudentDashboard from './pages/Dashboard/StudentDashboard';
+import TeacherDashboard from './pages/Dashboard/TeacherDashboard';
 import AdminDashboard from './pages/Dashboard/AdminDashboard';
-import MemberDeliverablesPage from './pages/Member/Deliverables';
-import DeliverableSubmitPage from './pages/Member/DeliverableSubmit';
-import HistoryPage from './pages/Member/History';
+import StudentDeliverablesPage from './pages/Student/Deliverables';
+import DeliverableSubmitPage from './pages/Student/DeliverableSubmit';
+import HistoryPage from './pages/Student/History';
+import AssignmentsPage from './pages/Student/Assignments';
 import MockUserPanel from './components/MockUserPanel';
 import './styles/global.css';
 
@@ -65,29 +66,38 @@ function AppContent() {
         }
       />
 
-      {/* Member Routes */}
+      {/* Student Routes */}
       <Route
-        path="/member/deliverables"
+        path="/student/assignments"
         element={
-          <ProtectedRoute requiredRole="MEMBER">
-            <MemberDeliverablesPage />
+          <ProtectedRoute requiredRole="STUDENT">
+            <AssignmentsPage />
           </ProtectedRoute>
         }
       />
 
       <Route
-        path="/member/deliverables/:id"
+        path="/student/deliverables"
         element={
-          <ProtectedRoute requiredRole="MEMBER">
+          <ProtectedRoute requiredRole="STUDENT">
+            <StudentDeliverablesPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/student/deliverables/:id"
+        element={
+          <ProtectedRoute requiredRole="STUDENT">
             <DeliverableSubmitPage />
           </ProtectedRoute>
         }
       />
 
       <Route
-        path="/member/history"
+        path="/student/history"
         element={
-          <ProtectedRoute requiredRole="MEMBER">
+          <ProtectedRoute requiredRole="STUDENT">
             <HistoryPage />
           </ProtectedRoute>
         }
@@ -102,10 +112,10 @@ function AppContent() {
 function DashboardRouter() {
   const { user } = useAuth();
 
-  if (user?.role === 'MEMBER') {
-    return <MemberDashboard />;
-  } else if (user?.role === 'MANAGER') {
-    return <ManagerDashboard />;
+  if (user?.role === 'STUDENT') {
+    return <StudentDashboard />;
+  } else if (user?.role === 'TEACHER') {
+    return <TeacherDashboard />;
   } else if (user?.role === 'ADMIN') {
     return <AdminDashboard />;
   }

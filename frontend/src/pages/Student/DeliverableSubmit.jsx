@@ -17,7 +17,7 @@ export const DeliverableSubmitPage = () => {
   const [dragActive, setDragActive] = useState(false);
 
   const handleGoBack = () => {
-    navigate('/member/deliverables');
+    navigate('/student/deliverables');
   };
 
   const handleFileSelect = (e) => {
@@ -104,7 +104,7 @@ export const DeliverableSubmitPage = () => {
       
       // Redirect after 2 seconds
       setTimeout(() => {
-        navigate('/member/deliverables');
+        navigate('/student/deliverables');
       }, 2000);
     } catch (err) {
       setError('Failed to submit file. Please try again.');

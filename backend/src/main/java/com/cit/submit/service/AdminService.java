@@ -79,10 +79,10 @@ public class AdminService {
         user.setPasswordHash(request.getPasswordHash());
         
         // Set role-specific ID
-        if (request.getRole() == UserRole.MEMBER) {
+        if (request.getRole() == UserRole.STUDENT) {
             user.setStudentId(request.getStudentId());
             user.setTeamCode(request.getTeamCode());
-        } else if (request.getRole() == UserRole.MANAGER || request.getRole() == UserRole.ADMIN) {
+        } else if (request.getRole() == UserRole.TEACHER || request.getRole() == UserRole.ADMIN) {
             user.setFacultyId(request.getFacultyId());
             user.setDepartment(request.getDepartment());
         }
@@ -123,7 +123,7 @@ public class AdminService {
         }
 
         // Update role-specific ID
-        if (request.getRole() == UserRole.MEMBER) {
+        if (request.getRole() == UserRole.STUDENT) {
             if (request.getStudentId() != null && !request.getStudentId().equals(user.getStudentId())) {
                 changedFields.append("studentId: ").append(user.getStudentId()).append(" -> ").append(request.getStudentId()).append("; ");
                 user.setStudentId(request.getStudentId());
@@ -132,7 +132,7 @@ public class AdminService {
                 changedFields.append("teamCode: ").append(user.getTeamCode()).append(" -> ").append(request.getTeamCode()).append("; ");
                 user.setTeamCode(request.getTeamCode());
             }
-        } else if (request.getRole() == UserRole.MANAGER || request.getRole() == UserRole.ADMIN) {
+        } else if (request.getRole() == UserRole.TEACHER || request.getRole() == UserRole.ADMIN) {
             if (request.getFacultyId() != null && !request.getFacultyId().equals(user.getFacultyId())) {
                 changedFields.append("facultyId: ").append(user.getFacultyId()).append(" -> ").append(request.getFacultyId()).append("; ");
                 user.setFacultyId(request.getFacultyId());
@@ -274,10 +274,10 @@ public class AdminService {
         response.setRole(user.getRole());
         
         // Set role-specific ID based on role
-        if (user.getRole() == UserRole.MEMBER) {
+        if (user.getRole() == UserRole.STUDENT) {
             response.setStudentId(user.getStudentId());
             response.setTeamCode(user.getTeamCode());
-        } else if (user.getRole() == UserRole.MANAGER || user.getRole() == UserRole.ADMIN) {
+        } else if (user.getRole() == UserRole.TEACHER || user.getRole() == UserRole.ADMIN) {
             response.setFacultyId(user.getFacultyId());
             response.setDepartment(user.getDepartment());
         }

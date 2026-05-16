@@ -4,6 +4,7 @@ import { Navbar } from '../components/Navbar';
 import { Button } from '../components/Button';
 import { Input, Select } from '../components/Input';
 import { Alert } from '../components/Alert';
+import { StudentImportUpload } from '../components/StudentImportUpload';
 import './AdminPanel.css';
 
 export const AdminPanel = () => {
@@ -228,6 +229,12 @@ export const AdminPanel = () => {
             Users Management
           </button>
           <button
+            className={`tab-btn ${activeTab === 'imports' ? 'active' : ''}`}
+            onClick={() => setActiveTab('imports')}
+          >
+            Student Imports
+          </button>
+          <button
             className={`tab-btn ${activeTab === 'audit' ? 'active' : ''}`}
             onClick={() => setActiveTab('audit')}
           >
@@ -277,7 +284,7 @@ export const AdminPanel = () => {
                     onChange={handleInputChange}
                     options={[
                       { value: 'contributor', label: 'Contributor' },
-                      { value: 'manager', label: 'Manager' },
+                      { value: 'teacher', label: 'Teacher' },
                       { value: 'admin', label: 'Admin' },
                     ]}
                   />
@@ -341,7 +348,7 @@ export const AdminPanel = () => {
                               className="role-select"
                             >
                               <option value="contributor">Contributor</option>
-                              <option value="manager">Manager</option>
+                              <option value="teacher">Teacher</option>
                               <option value="admin">Admin</option>
                             </select>
                           </td>
@@ -376,6 +383,15 @@ export const AdminPanel = () => {
                   </table>
                 </div>
               )}
+            </div>
+          )}
+
+          {activeTab === 'imports' && (
+            <div className="imports-section">
+              <StudentImportUpload 
+                userId={user.id} 
+                apiBaseUrl={import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'}
+              />
             </div>
           )}
 

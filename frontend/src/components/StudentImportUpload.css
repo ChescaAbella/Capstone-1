@@ -1,0 +1,304 @@
+.student-import-upload {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  padding: 1.5rem;
+  background: var(--color-background, #f5f5f5);
+  border-radius: 8px;
+}
+
+.upload-section {
+  background: white;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.upload-section h3 {
+  margin-top: 0;
+  color: var(--color-text-primary, #333);
+}
+
+.file-drop-zone {
+  border: 2px dashed var(--color-border, #ccc);
+  border-radius: 8px;
+  padding: 3rem 2rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: var(--color-background, #f9f9f9);
+  margin: 1.5rem 0;
+}
+
+.file-drop-zone:hover {
+  border-color: var(--color-primary, #4a90e2);
+  background: var(--color-primary, #4a90e2)08;
+}
+
+.file-drop-zone.drag-over {
+  border-color: var(--color-primary, #4a90e2);
+  background: var(--color-primary, #4a90e2)15;
+  transform: scale(1.02);
+}
+
+.drop-icon {
+  font-size: 3rem;
+  margin-bottom: 0.5rem;
+}
+
+.file-drop-zone p {
+  margin: 0.5rem 0;
+  color: var(--color-text-secondary, #666);
+}
+
+.or-text {
+  font-weight: 600;
+  color: var(--color-text-primary, #333) !important;
+  margin: 1rem 0 !important;
+}
+
+.file-selected {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  background: var(--color-success, #e8f5e9)20;
+  border-left: 4px solid var(--color-success, #4caf50);
+  border-radius: 4px;
+  margin: 1rem 0;
+  gap: 1rem;
+}
+
+.file-selected span {
+  color: var(--color-text-primary, #333);
+  font-weight: 500;
+}
+
+.upload-instructions {
+  background: var(--color-background, #f5f5f5);
+  padding: 1.5rem;
+  border-radius: 6px;
+  margin: 1.5rem 0;
+}
+
+.upload-instructions h4 {
+  margin-top: 0;
+  color: var(--color-text-primary, #333);
+}
+
+.upload-instructions ul {
+  margin: 0.5rem 0 0 1.5rem;
+  padding: 0;
+}
+
+.upload-instructions li {
+  margin: 0.5rem 0;
+  color: var(--color-text-secondary, #666);
+}
+
+.upload-result {
+  background: white;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.upload-result h3 {
+  margin-top: 0;
+  color: var(--color-text-primary, #333);
+}
+
+.result-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.stat {
+  padding: 1rem;
+  border-radius: 6px;
+  text-align: center;
+  background: var(--color-background, #f5f5f5);
+}
+
+.stat.success {
+  background: var(--color-success, #4caf50)15;
+  border-left: 4px solid var(--color-success, #4caf50);
+}
+
+.stat.error {
+  background: var(--color-error, #f44336)15;
+  border-left: 4px solid var(--color-error, #f44336);
+}
+
+.stat-label {
+  display: block;
+  font-size: 0.875rem;
+  color: var(--color-text-secondary, #666);
+  margin-bottom: 0.5rem;
+}
+
+.stat-value {
+  display: block;
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--color-text-primary, #333);
+}
+
+.errors-list {
+  background: var(--color-error, #f44336)10;
+  padding: 1rem;
+  border-radius: 6px;
+  border-left: 4px solid var(--color-error, #f44336);
+}
+
+.errors-list h4 {
+  margin-top: 0;
+  color: var(--color-error, #f44336);
+}
+
+.errors-list ul {
+  margin: 0.5rem 0 0 1.5rem;
+  padding: 0;
+}
+
+.errors-list li {
+  margin: 0.3rem 0;
+  color: var(--color-text-primary, #333);
+  font-size: 0.9rem;
+}
+
+.imported-students-section {
+  background: white;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.section-header h3 {
+  margin: 0;
+  color: var(--color-text-primary, #333);
+}
+
+.no-data {
+  padding: 2rem;
+  text-align: center;
+  color: var(--color-text-secondary, #666);
+  background: var(--color-background, #f5f5f5);
+  border-radius: 6px;
+}
+
+.students-table-wrapper {
+  overflow-x: auto;
+}
+
+.students-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+
+.students-table thead {
+  background: var(--color-background, #f5f5f5);
+}
+
+.students-table th {
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  color: var(--color-text-primary, #333);
+  border-bottom: 2px solid var(--color-border, #ddd);
+  font-size: 0.9rem;
+}
+
+.students-table td {
+  padding: 1rem;
+  border-bottom: 1px solid var(--color-border, #eee);
+  color: var(--color-text-primary, #333);
+}
+
+.students-table tbody tr:hover {
+  background: var(--color-background, #f5f5f5);
+}
+
+.status {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.status.registered {
+  background: var(--color-success, #4caf50)20;
+  color: var(--color-success, #2e7d32);
+}
+
+.status.pending {
+  background: var(--color-warning, #ff9800)20;
+  color: var(--color-warning, #e65100);
+}
+
+.delete-btn {
+  background: var(--color-error, #f44336);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 0.4rem 0.6rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+}
+
+.delete-btn:hover {
+  background: var(--color-error, #d32f2f);
+  transform: scale(1.1);
+}
+
+.delete-btn:active {
+  transform: scale(0.95);
+}
+
+@media (max-width: 768px) {
+  .student-import-upload {
+    gap: 1rem;
+    padding: 1rem;
+  }
+
+  .upload-section,
+  .upload-result,
+  .imported-students-section {
+    padding: 1rem;
+  }
+
+  .file-drop-zone {
+    padding: 2rem 1rem;
+  }
+
+  .result-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .students-table {
+    font-size: 0.85rem;
+  }
+
+  .students-table th,
+  .students-table td {
+    padding: 0.75rem 0.5rem;
+  }
+
+  .section-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+}

@@ -1,18 +1,21 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import DashboardLayout from './DashboardLayout';
 import { Card, CardBody } from '../../components/Card';
 import { Button } from '../../components/Button';
 import { Badge } from '../../components/Badge';
-import { Table } from '../../components/Table';
 import { Modal } from '../../components/Modal';
-import { Input, Textarea } from '../../components/Input';
+import { Textarea } from '../../components/Input';
 import { useAuth } from '../../context/AuthContext';
 import './Dashboard.css';
 
-const MemberDashboard = () => {
+const StudentDashboard = () => {
   const { user } = useAuth();
   const [showAssistant, setShowAssistant] = useState(false);
   const [assistantMessage, setAssistantMessage] = useState('');
+  const [assignments, setAssignments] = useState([]);
+  const [assignmentsLoading, setAssignmentsLoading] = useState(true);
+
+  const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
 
   // Sample data
   const submissions = [
@@ -71,27 +74,30 @@ const MemberDashboard = () => {
     },
   ];
 
-  const submissionColumns = [
-    { key: 'title', label: 'Deliverable', width: '30%' },
-    { key: 'course', label: 'Project', width: '15%' },
-    { key: 'dueDate', label: 'Due Date', width: '15%' },
-    {
-      key: 'status',
-      label: 'Status',
-      width: '15%',
-      render: (status) => (
-        <Badge variant={status === 'completed' ? 'success' : status === 'submitted' ? 'info' : status === 'in-progress' ? 'warning' : 'default'}>
-          {status}
-        </Badge>
-      ),
-    },
-    {
-      key: 'grade',
-      label: 'Feedback',
-      width: '15%',
-      render: (grade) => grade ? <span className="grade-badge">{grade}</span> : <span>—</span>,
-    },
-  ];
+  useEffect(() => {
+    fetchAssignments();
+  }, []);
+
+  const fetchAssignments = async () => {
+    try {
+      setAssignmentsLoading(true);
+      const response = await fetch(`${API_BASE}/api/submissions/published`, {
+        headers: {
+          'X-User-Id': user.id,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        // Get only the first 3 assignments for the dashboard preview
+        setAssignments(data.slice(0, 3));
+      }
+    } catch (err) {
+      console.error('Failed to fetch assignments:', err);
+    } finally {
+      setAssignmentsLoading(false);
+    }
+  };
 
   const deadlineColumns = [
     { key: 'title', label: 'Assignment', width: '50%' },
@@ -109,7 +115,7 @@ const MemberDashboard = () => {
   ];
 
   return (
-    <DashboardLayout role="MEMBER">
+    <DashboardLayout role="STUDENT">
       <div className="welcome-section">
         <h1>Welcome, {user?.name?.split(' ')[0]}! 👋</h1>
         <p>Here's your submission overview and upcoming deadlines</p>
@@ -159,16 +165,108 @@ const MemberDashboard = () => {
           </CardBody>
         </Card>
 
+        {/* Active Assignments */}
+        <div className="dashboard-section">
+          <div className="section-header">
+            <h2>📝 Active Assignments</h2>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => window.location.href = '/student/assignments'}
+              text="View All"
+            />
+          </div>
+          {assignmentsLoading ? (
+            <div className="loading-state">Loading assignments...</div>
+          ) : assignments.length === 0 ? (
+            <div className="empty-state-small">
+              <p>No active assignments at the moment</p>
+            </div>
+          ) : (
+            <div className="assignments-preview">
+              {assignments.map((assignment) => (
+                <Card key={assignment.id} className="assignment-preview-card">
+                  <CardBody>
+                    <div className="assignment-preview-header">
+                      <h4>{assignment.title}</h4>
+                      <Badge text={`Due ${new Date(assignment.dueDate).toLocaleDateString()}`} />
+                    </div>
+                    <p className="assignment-preview-desc">{assignment.description}</p>
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      onClick={() => window.location.href = `/student/deliverables/${assignment.id}`}
+                      text="Submit Now"
+                    />
+                  </CardBody>
+                </Card>
+              ))}
+            </div>
+          )}
+        </div>
+
         {/* Upcoming Deadlines */}
         <div className="dashboard-section">
           <h2>⏰ Upcoming Deadlines</h2>
-          <Table columns={deadlineColumns} data={upcomingDeadlines} />
+          <div className="table-container">
+            <table className="dashboard-table">
+              <thead>
+                <tr>
+                  <th>Assignment</th>
+                  <th>Days Left</th>
+                  <th>Priority</th>
+                </tr>
+              </thead>
+              <tbody>
+                {upcomingDeadlines.map((deadline) => (
+                  <tr key={deadline.id}>
+                    <td>{deadline.title}</td>
+                    <td>{deadline.daysLeft}</td>
+                    <td>
+                      <Badge
+                        text={deadline.priority}
+                        variant={deadline.priority === 'critical' ? 'danger' : deadline.priority === 'high' ? 'warning' : 'info'}
+                      />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
 
         {/* Recent Submissions */}
         <div className="dashboard-section">
           <h2>📤 Your Submissions</h2>
-          <Table columns={submissionColumns} data={submissions} />
+          <div className="table-container">
+            <table className="dashboard-table">
+              <thead>
+                <tr>
+                  <th>Deliverable</th>
+                  <th>Project</th>
+                  <th>Due Date</th>
+                  <th>Status</th>
+                  <th>Feedback</th>
+                </tr>
+              </thead>
+              <tbody>
+                {submissions.map((submission) => (
+                  <tr key={submission.id}>
+                    <td className="title-cell">{submission.title}</td>
+                    <td>{submission.course}</td>
+                    <td>{submission.dueDate}</td>
+                    <td>
+                      <Badge
+                        text={submission.status}
+                        variant={submission.status === 'completed' ? 'success' : submission.status === 'submitted' ? 'info' : submission.status === 'in-progress' ? 'warning' : 'default'}
+                      />
+                    </td>
+                    <td>{submission.grade ? <span className="grade-badge">{submission.grade}</span> : <span>—</span>}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
 
         {/* AI Assistant Modal */}
@@ -201,4 +299,4 @@ const MemberDashboard = () => {
   );
 };
 
-export default MemberDashboard;
+export default StudentDashboard;

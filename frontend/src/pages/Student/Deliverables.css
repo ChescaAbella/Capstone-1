@@ -1,6 +1,6 @@
-/* Member Deliverables Page Styles */
+/* Student Deliverables Page Styles */
 
-.member-deliverables-page {
+.student-deliverables-page {
   width: 100%;
   min-height: 100vh;
   padding: var(--spacing-xl, 24px);
@@ -270,7 +270,7 @@
 }
 
 @media (max-width: 768px) {
-  .member-deliverables-page {
+  .student-deliverables-page {
     padding: var(--spacing-lg, 16px);
   }
 
@@ -316,7 +316,7 @@
 }
 
 @media (max-width: 480px) {
-  .member-deliverables-page {
+  .student-deliverables-page {
     padding: var(--spacing-md, 12px);
   }
 

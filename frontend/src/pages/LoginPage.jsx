@@ -112,7 +112,7 @@ export const LoginPage = () => {
               label="Role"
               options={[
                 { value: 'contributor', label: 'Contributor / Submitter' },
-                { value: 'manager', label: 'Manager / Coordinator' },
+                { value: 'teacher', label: 'Teacher / Coordinator' },
                 { value: 'admin', label: 'Administrator' },
               ]}
               value={role}
