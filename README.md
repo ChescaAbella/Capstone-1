@@ -106,10 +106,26 @@ mvn spring-boot:run
 
 ## 🎨 Frontend Setup (React + Vite)
 
+### Frontend-only demo mode
+
+The frontend can be opened without starting the Spring Boot backend. It includes local mock data for the main demo workflows.
+
+From the repository root, run:
+
+```powershell
+cd frontend
+npm install
+npm run dev
+```
+
+Open the URL printed by Vite, normally **http://localhost:5173**. Use the **Mock User (Dev Only)** panel in the lower-right corner to enter the Student, Teacher, or Admin view.
+
+Frontend-only demo mode does not provide real Google authentication, Supabase persistence, or production file storage. Start the backend as well when testing those features.
+
 ### Step 1: Configure Environment Variables
 
 ```bash
-cd capstone-project
+cd frontend
 
 # Copy template to create config file (Windows)
 copy .env.example .env.local
@@ -120,7 +136,7 @@ cp .env.example .env.local
 
 ### Step 2: Fill in OAuth Client ID
 
-Open `capstone-project/.env.local` and update:
+Open `frontend/.env.local` and update:
 
 ```env
 VITE_GOOGLE_CLIENT_ID=your-actual-client-id.apps.googleusercontent.com
@@ -183,7 +199,7 @@ Wait for: `Started DeliverEaseApplication`
 **Terminal 2 - Start Frontend:**
 
 ```bash
-cd capstone-project
+cd frontend
 npm install
 npm run dev
 ```
