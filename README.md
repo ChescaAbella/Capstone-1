@@ -6,7 +6,7 @@ A web-based Deliverable Submission and Tracking System enhanced with AI-powered 
 
 ## 🧩 Tech Stack Used
 
-- **Backend:** Spring Boot 4.0.0 (Java 21)
+- **Backend:** Spring Boot 4.0.0 (Java 25)
 - **Frontend:** React.js 19 + Vite 7
 - **Database:** Supabase (PostgreSQL)
 - **Authentication:** JWT + OAuth 2.0 (Google)
@@ -19,7 +19,7 @@ A web-based Deliverable Submission and Tracking System enhanced with AI-powered 
 
 Before you begin, ensure you have:
 
-- **Java 21 or higher** - [Download](https://www.oracle.com/java/technologies/downloads/)
+- **Java 25 or higher** - [Download](https://www.oracle.com/java/technologies/downloads/)
 - **Maven 3.9+** - [Download](https://maven.apache.org/download.cgi)
 - **Node.js 18+** - [Download](https://nodejs.org/)
 - **Git** - [Download](https://git-scm.com/)
@@ -28,7 +28,7 @@ Before you begin, ensure you have:
 Verify installation:
 
 ```bash
-java --version    # Should show 21.x.x or higher
+java --version    # Should show 25.x.x or higher
 mvn --version     # Should show 3.9.x
 node --version    # Should show 18.x.x or higher
 ```

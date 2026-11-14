@@ -26,7 +26,7 @@ export const AdminPanel = () => {
   });
 
   useEffect(() => {
-    if (user?.role !== 'admin') {
+    if (user?.role?.toUpperCase() !== 'ADMIN') {
       setError('Access Denied: Admin privileges required');
       return;
     }
@@ -195,7 +195,7 @@ export const AdminPanel = () => {
     }));
   };
 
-  if (user?.role !== 'admin') {
+  if (user?.role?.toUpperCase() !== 'ADMIN') {
     return (
       <div>
         <Navbar />

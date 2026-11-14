@@ -5,8 +5,8 @@ import { verifyGoogleToken } from '../services/googleOAuth';
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(mockTeacherUser); // Default to teacher for dev
-  const [isAuthenticated, setIsAuthenticated] = useState(true); // Start authenticated for dev
+  const [user, setUser] = useState(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(false);
   const [token, setToken] = useState('dev-token');
 
@@ -24,6 +24,13 @@ export const AuthProvider = ({ children }) => {
       } catch (e) {
         console.error('Failed to parse saved user:', e);
       }
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!localStorage.getItem('user')) {
+      setUser(null);
+      setIsAuthenticated(false);
     }
   }, []);
 
