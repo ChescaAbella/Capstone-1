@@ -122,6 +122,20 @@ Open the URL printed by Vite, normally **http://localhost:5173**. Use the **Mock
 
 Frontend-only demo mode does not provide real Google authentication, Supabase persistence, or production file storage. Start the backend as well when testing those features.
 
+#### Teacher demo without the backend
+
+1. Start the frontend using the commands above.
+2. Open **http://localhost:5173**.
+3. In **Mock User (Dev Only)**, select **Teacher**.
+4. Open the teacher dashboard tabs or sidebar:
+   - **Deliverables**: create, edit, publish, and delete assignments; view and grade mock student submissions.
+   - **Class Members**: view local mock students and teams.
+   - **Analytics**: view completion and grading metrics from the local mock assignments.
+   - **Settings**: save local notification preferences.
+5. To test a different role, select **Student** or **Admin** in the same mock-user panel.
+
+The frontend automatically intercepts `/api/*` requests in demo mode, so no Java process, database, `.env` file, or `VITE_API_BASE_URL` setting is required. Changes made in the demo are held in browser memory/local storage and are not shared with other users. Refreshing the page may reset assignment and grading data; use the browser's local-storage tools to clear stale demo data if necessary.
+
 ### Step 1: Configure Environment Variables
 
 ```bash
