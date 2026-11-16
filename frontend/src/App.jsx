@@ -14,6 +14,10 @@ import DeliverableSubmitPage from './pages/Student/DeliverableSubmit';
 import HistoryPage from './pages/Student/History';
 import AssignmentsPage from './pages/Student/Assignments';
 import MockUserPanel from './components/MockUserPanel';
+import TeacherDeliverables from './pages/Teacher/TeacherDeliverables';
+import ClassMembers from './pages/Teacher/ClassMembers';
+import Analytics from './pages/Teacher/Analytics';
+import Settings from './pages/Teacher/Settings';
 import './styles/global.css';
 
 // Protected Route Component
@@ -102,6 +106,11 @@ function AppContent() {
           </ProtectedRoute>
         }
       />
+
+      <Route path="/deliverables" element={<ProtectedRoute requiredRole="TEACHER"><TeacherDeliverables /></ProtectedRoute>} />
+      <Route path="/team" element={<ProtectedRoute requiredRole="TEACHER"><ClassMembers /></ProtectedRoute>} />
+      <Route path="/analytics" element={<ProtectedRoute requiredRole="TEACHER"><Analytics /></ProtectedRoute>} />
+      <Route path="/settings" element={<ProtectedRoute requiredRole="TEACHER"><Settings /></ProtectedRoute>} />
       
       <Route path="*" element={<Navigate to="/" />} />
     </Routes>

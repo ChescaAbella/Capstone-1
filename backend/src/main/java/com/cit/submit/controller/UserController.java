@@ -2,10 +2,13 @@ package com.cit.submit.controller;
 
 import com.cit.submit.dto.UserProfileRequest;
 import com.cit.submit.dto.UserProfileResponse;
+import com.cit.submit.dto.UserAdminResponse;
 import com.cit.submit.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/users")
@@ -32,6 +35,16 @@ public class UserController {
         try {
             UserProfileResponse profile = userService.updateUserProfile(id, request);
             return ResponseEntity.ok(profile);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
+        }
+    }
+
+    @GetMapping("/class-members")
+    public ResponseEntity<?> getClassMembers(@RequestHeader("X-User-Id") Long userId) {
+        try {
+            List<UserAdminResponse> members = userService.getClassMembers(userId);
+            return ResponseEntity.ok(members);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
         }

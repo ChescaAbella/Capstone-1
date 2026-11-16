@@ -1,7 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import DashboardLayout from './DashboardLayout';
 import { Card, CardBody } from '../../components/Card';
-import { Button } from '../../components/Button';
 import { Badge } from '../../components/Badge';
 import { useAuth } from '../../context/AuthContext';
 import Submissions from '../Teacher/Submissions';
@@ -12,62 +11,35 @@ const TeacherDashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
 
   // Overview state
-  const [assignments] = useState([
-    {
-      id: 1,
-      title: 'Project Kickoff',
-      course: 'Website Redesign',
-      dueDate: '2025-01-15',
-      submissions: '28/30',
-      status: 'closed',
-    },
-    {
-      id: 2,
-      title: 'Phase 2 Deliverables',
-      course: 'Mobile App Dev',
-      dueDate: '2025-01-20',
-      submissions: '25/30',
-      status: 'active',
-    },
-    {
-      id: 3,
-      title: 'Design Review',
-      course: 'UI/UX Project',
-      dueDate: '2025-01-25',
-      submissions: '22/30',
-      status: 'active',
-    },
-  ]);
+  const [assignments, setAssignments] = useState([]);
+  const [students, setStudents] = useState([]);
 
-  const students = [
-    { id: 1, name: 'John Doe', email: 'john@example.com', submissions: 25, avgGrade: 'Excellent' },
-    { id: 2, name: 'Jane Smith', email: 'jane@example.com', submissions: 28, avgGrade: 'Outstanding' },
-    { id: 3, name: 'Bob Johnson', email: 'bob@example.com', submissions: 20, avgGrade: 'Good' },
-  ];
+  useEffect(() => {
+    const headers = { 'X-User-Id': user.id };
+    Promise.all([
+      fetch('/api/submissions/my-submissions', { headers }).then((response) => response.json()),
+      fetch('/api/users/class-members', { headers }).then((response) => response.json()),
+    ])
+      .then(([assignmentData, userData]) => {
+        setAssignments(assignmentData);
+        setStudents(userData.filter((item) => item.role === 'STUDENT'));
+      })
+      .catch(() => {
+        setAssignments([]);
+        setStudents([]);
+      });
+  }, [user.id]);
 
-  const assignmentColumns = [
-    { key: 'title', label: 'Deliverable', width: '30%' },
-    { key: 'course', label: 'Project', width: '15%' },
-    { key: 'dueDate', label: 'Due Date', width: '15%' },
-    { key: 'submissions', label: 'Submissions', width: '15%' },
-    {
-      key: 'status',
-      label: 'Status',
-      width: '15%',
-      render: (status) => (
-        <Badge variant={status === 'active' ? 'success' : 'info'}>
-          {status}
-        </Badge>
-      ),
-    },
-  ];
-
-  const studentColumns = [
-    { key: 'name', label: 'Name', width: '25%' },
-    { key: 'email', label: 'Email', width: '35%' },
-    { key: 'submissions', label: 'Submissions', width: '20%' },
-    { key: 'avgGrade', label: 'Avg Grade', width: '20%' },
-  ];
+  const metrics = useMemo(() => {
+    const total = assignments.reduce((sum, item) => sum + Number(item.totalStudents || 0), 0);
+    const submitted = assignments.reduce((sum, item) => sum + Number(item.submittedCount || 0), 0);
+    return {
+      active: assignments.filter((item) => item.isPublished && new Date(item.dueDate) >= new Date()).length,
+      submitted,
+      total,
+      completion: total ? `${Math.round((submitted / total) * 100)}%` : '0%',
+    };
+  }, [assignments]);
 
   return (
     <DashboardLayout role="TEACHER">
@@ -97,25 +69,25 @@ const TeacherDashboard = () => {
           <div className="stats-grid">
             <Card>
               <CardBody className="stat-card">
-                <div className="stat-value">3</div>
+                <div className="stat-value">{metrics.active}</div>
                 <div className="stat-label">Active Assignments</div>
               </CardBody>
             </Card>
             <Card>
               <CardBody className="stat-card">
-                <div className="stat-value">75/90</div>
+                <div className="stat-value">{metrics.submitted}/{metrics.total}</div>
                 <div className="stat-label">Total Submissions</div>
               </CardBody>
             </Card>
             <Card>
               <CardBody className="stat-card">
-                <div className="stat-value">30</div>
+                <div className="stat-value">{students.length}</div>
                 <div className="stat-label">Class Members</div>
               </CardBody>
             </Card>
             <Card>
               <CardBody className="stat-card">
-                <div className="stat-value">83%</div>
+                <div className="stat-value">{metrics.completion}</div>
                 <div className="stat-label">Completion Rate</div>
               </CardBody>
             </Card>
@@ -139,13 +111,13 @@ const TeacherDashboard = () => {
                   {assignments.map((assignment) => (
                     <tr key={assignment.id}>
                       <td className="title-cell">{assignment.title}</td>
-                      <td>{assignment.course}</td>
-                      <td>{assignment.dueDate}</td>
-                      <td className="submissions-cell">{assignment.submissions}</td>
+                      <td>{assignment.teamCode || 'All Teams'}</td>
+                      <td>{new Date(assignment.dueDate).toLocaleDateString()}</td>
+                      <td className="submissions-cell">{assignment.submittedCount || 0}/{assignment.totalStudents || 0}</td>
                       <td>
                         <Badge
-                          text={assignment.status}
-                          variant={assignment.status === 'active' ? 'success' : 'default'}
+                          text={assignment.isPublished ? 'Published' : 'Draft'}
+                          variant={assignment.isPublished ? 'success' : 'default'}
                         />
                       </td>
                     </tr>
@@ -173,8 +145,8 @@ const TeacherDashboard = () => {
                     <tr key={student.id}>
                       <td>{student.name}</td>
                       <td>{student.email}</td>
-                      <td>{student.submissions}</td>
-                      <td>{student.avgGrade}</td>
+                      <td>—</td>
+                      <td>Not graded</td>
                     </tr>
                   ))}
                 </tbody>

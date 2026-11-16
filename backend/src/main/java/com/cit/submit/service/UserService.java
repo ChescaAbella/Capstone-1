@@ -2,11 +2,15 @@ package com.cit.submit.service;
 
 import com.cit.submit.dto.UserProfileRequest;
 import com.cit.submit.dto.UserProfileResponse;
+import com.cit.submit.dto.UserAdminResponse;
 import com.cit.submit.model.User;
 import com.cit.submit.model.UserRole;
 import com.cit.submit.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService {
@@ -38,6 +42,7 @@ public class UserService {
             if (request.getName().length() < 2) {
                 throw new Exception("Name must be at least 2 characters");
             }
+
             user.setName(request.getName());
         } else {
             throw new Exception("Name is required");
@@ -79,6 +84,34 @@ public class UserService {
                 user.getTeamCode(),
                 user.getPictureUrl()
         );
+    }
+
+    public List<UserAdminResponse> getClassMembers(Long userId) throws Exception {
+        User requester = userRepository.findById(userId)
+                .orElseThrow(() -> new Exception("User not found"));
+        if (requester.getRole() != UserRole.TEACHER && requester.getRole() != UserRole.ADMIN) {
+            throw new Exception("Only teachers and admins can view class members");
+        }
+
+        return userRepository.findAll().stream()
+                .filter(user -> user.getRole() == UserRole.STUDENT)
+                .map(user -> new UserAdminResponse(
+                        user.getId(),
+                        user.getName(),
+                        user.getEmail(),
+                        user.getRole(),
+                        user.getStudentId(),
+                        user.getFacultyId(),
+                        user.getTeamCode(),
+                        user.getDepartment(),
+                        user.getActive(),
+                        user.getEmailVerified(),
+                        user.getIsProfileComplete(),
+                        user.getAccountStatus(),
+                        user.getCreatedAt() != null ? user.getCreatedAt().toString() : null,
+                        user.getApprovedAt() != null ? user.getApprovedAt().toString() : null
+                ))
+                .collect(Collectors.toList());
     }
 
     private boolean isValidUrl(String url) {

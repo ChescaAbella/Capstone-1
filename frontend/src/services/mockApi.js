@@ -73,6 +73,48 @@ const mockAssignments = [
   },
 ];
 
+let assignments = [...mockAssignments.map((assignment, index) => ({
+  ...assignment,
+  createdBy: mockTeacherUser.id,
+  isPublished: true,
+  submittedCount: index === 0 ? 1 : 0,
+  gradedCount: 0,
+  totalStudents: 2,
+}))];
+
+let studentSubmissions = [
+  {
+    id: 501,
+    submissionId: 101,
+    submissionTitle: 'Capstone Proposal',
+    studentEmail: mockUser.email,
+    studentName: mockUser.name,
+    teamCode: mockUser.teamCode,
+    fileName: 'capstone-proposal.pdf',
+    fileSizeMb: 1.4,
+    submissionStatus: 'SUBMITTED',
+    submittedAt: '2026-11-01T10:00:00',
+    isLate: false,
+    grade: null,
+    feedback: '',
+  },
+  {
+    id: 502,
+    submissionId: 101,
+    submissionTitle: 'Capstone Proposal',
+    studentEmail: 'student2@school.edu',
+    studentName: 'Alex Student',
+    teamCode: 'TEAM-B',
+    fileName: null,
+    fileSizeMb: null,
+    submissionStatus: 'NOT_SUBMITTED',
+    submittedAt: null,
+    isLate: false,
+    grade: null,
+    feedback: '',
+  },
+];
+
 const initialUsers = [mockUser, mockTeacherUser, mockAdminUser];
 let users = [...initialUsers];
 let auditLogs = [
@@ -145,19 +187,83 @@ const createMockResponse = (endpoint, method, data, options) => {
   }
 
   if (endpoint === '/api/submissions/published' || endpoint === '/api/submissions/available') {
-    return mockAssignments;
+    return assignments.filter((assignment) => assignment.isPublished);
   }
 
   if (endpoint === '/api/submissions/my-submissions') {
-    return mockAssignments.map((assignment) => ({
-      ...assignment,
-      createdBy: mockTeacherUser.id,
-      submissions: assignment.id === 101 ? 1 : 0,
-    }));
+    return assignments.filter((assignment) => assignment.createdBy === currentUser.id);
+  }
+
+  if (endpoint === '/api/submissions' && method === 'POST') {
+    const newAssignment = {
+      ...data,
+      id: Date.now(),
+      createdBy: currentUser.id,
+      isPublished: Boolean(data.isPublished),
+      submittedCount: 0,
+      gradedCount: 0,
+      totalStudents: users.filter((item) => item.role === 'STUDENT').length,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    assignments = [newAssignment, ...assignments];
+    return newAssignment;
+  }
+
+  const assignmentMatch = endpoint.match(/^\/api\/submissions\/(\d+)(?:\/(publish|student-submissions))?$/);
+  if (assignmentMatch) {
+    const assignmentId = Number(assignmentMatch[1]);
+    const action = assignmentMatch[2];
+    const assignment = assignments.find((item) => item.id === assignmentId);
+
+    if (action === 'student-submissions' && method === 'GET') {
+      return studentSubmissions.filter((item) => item.submissionId === assignmentId);
+    }
+
+    if (action === 'publish' && method === 'POST' && assignment) {
+      assignment.isPublished = true;
+      assignment.updatedAt = new Date().toISOString();
+      return assignment;
+    }
+
+    if (!action && method === 'PUT' && assignment) {
+      Object.assign(assignment, data, {
+        id: assignment.id,
+        updatedAt: new Date().toISOString(),
+      });
+      return assignment;
+    }
+
+    if (!action && method === 'DELETE') {
+      assignments = assignments.filter((item) => item.id !== assignmentId);
+      studentSubmissions = studentSubmissions.filter((item) => item.submissionId !== assignmentId);
+      return { success: true };
+    }
+  }
+
+  const gradeMatch = endpoint.match(/^\/api\/submissions\/student-submissions\/(\d+)\/grade\?(.+)$/);
+  if (gradeMatch && method === 'POST') {
+    const params = new URLSearchParams(gradeMatch[2]);
+    const submission = studentSubmissions.find((item) => item.id === Number(gradeMatch[1]));
+    if (submission) {
+      submission.grade = Number(params.get('grade'));
+      submission.feedback = params.get('feedback') || '';
+      submission.submissionStatus = 'GRADED';
+      submission.gradedAt = new Date().toISOString();
+      const assignment = assignments.find((item) => item.id === submission.submissionId);
+      if (assignment) assignment.gradedCount = studentSubmissions.filter(
+        (item) => item.submissionId === assignment.id && item.grade !== null
+      ).length;
+      return submission;
+    }
   }
 
   if (endpoint === '/api/admin/users' && method === 'GET') {
     return getUsersFromStorage();
+  }
+
+  if (endpoint === '/api/users/class-members' && method === 'GET') {
+    return getUsersFromStorage().filter((item) => item.role === 'STUDENT');
   }
 
   if (endpoint === '/api/admin/users' && method === 'POST') {

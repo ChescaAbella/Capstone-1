@@ -1,0 +1,21 @@
+.teacher-table-wrapper {
+  overflow-x: auto;
+}
+
+.teacher-settings-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+  max-width: 720px;
+}
+
+.teacher-settings-form label {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.settings-message {
+  color: var(--success-color);
+  margin: 0;
+}
